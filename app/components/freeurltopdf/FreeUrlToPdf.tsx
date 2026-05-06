@@ -206,8 +206,9 @@ export default function FreeUrlToPdf() {
           body: "Your PDF has been converted successfully.",
           fileUrl,
         })
+        
       });
-  
+      setEmailValue("")
       const data = await res.json();
   
       if (!res.ok || !data.success) {
@@ -215,6 +216,7 @@ export default function FreeUrlToPdf() {
       }
   
       setEmailSent(true);
+      setEmailValue("");
     } catch (e: unknown) {
       setEmailSent(false);
       setError(e instanceof Error ? e.message : "Failed to send email.");
