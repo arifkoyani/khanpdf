@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Link2, FileText } from "lucide-react";
+
 
 const navItems = [
   { to: "/", label: "Home" },
@@ -11,7 +11,7 @@ const navItems = [
   { to: "/blog", label: "Blog" },
 ] as const;
 
-export  default function Navbar() {
+export function Navbar() {
   const pathname = usePathname();
 
   return (
