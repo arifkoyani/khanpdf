@@ -200,19 +200,12 @@ export default function FreeUrlToPdf() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
+        body:JSON.stringify({
           email: emailValue.trim(),
           subject: "Your converted PDF is ready",
-          body: `Hi,
-  
-  Your converted PDF is ready.
-  
-  You can download or open it using this link:
-  
-  ${fileUrl}
-  
-  Thank you for using KhanPDF.`,
-        }),
+          body: "Your PDF has been converted successfully.",
+          fileUrl,
+        })
       });
   
       const data = await res.json();

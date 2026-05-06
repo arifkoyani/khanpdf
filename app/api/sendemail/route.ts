@@ -5,14 +5,15 @@ export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, subject, body } = await req.json();
+    const { email, subject, body, fileUrl } = await req.json();
 
-    if (!email || !subject || !body) {
-      return NextResponse.json(
-        { success: false, error: "Email, subject, and body are required." },
-        { status: 400 }
-      );
-    }
+  
+if (!email || !subject || !body || !fileUrl) {
+  return NextResponse.json(
+    { success: false, error: "Email, subject, body, and fileUrl are required." },
+    { status: 400 }
+  );
+}
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -59,8 +60,10 @@ export async function POST(req: NextRequest) {
     
                     <div style="text-align:center;margin:30px 0;">
                       <a 
-                        href="${body.match(/https?:\/\/[^\\s]+/)?.[0] || "#"}" 
+                       href="${fileUrl}" 
                         target="_blank"
+  rel="noopener noreferrer"
+                        
                         style="display:inline-block;background:#f16625;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:15px 28px;border-radius:12px;box-shadow:0 10px 24px rgba(241,102,37,0.28);"
                       >
                         Open Your PDF
