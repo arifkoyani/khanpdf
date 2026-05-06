@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Footer from "@/app/components/footer/footer";
-import Navbar from "@/app/components/navbar/navbar";
+import Footer from "./components/footer/footer";
+import  Navbar  from "./components/Navbar/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "khan pdf",
-  description: "khan pdf",
+  title: "KhanPDF",
+  description: "Convert public URLs into PDF files online.",
 };
 
 export default function RootLayout({
