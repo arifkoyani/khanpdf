@@ -181,7 +181,52 @@ export default function FreeUrlToPdf() {
     if (!fileUrl) return;
     window.open(fileUrl, "_blank", "noopener,noreferrer");
   };
-
+  const handleSendEmail = async () => {
+    if (!fileUrl) {
+      setError("PDF URL not found.");
+      return;
+    }
+  
+    if (!emailValue.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+  
+    try {
+      setError(null);
+  
+      const res = await fetch("/api/sendemail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: emailValue.trim(),
+          subject: "Your converted PDF is ready",
+          body: `Hi,
+  
+  Your converted PDF is ready.
+  
+  You can download or open it using this link:
+  
+  ${fileUrl}
+  
+  Thank you for using KhanPDF.`,
+        }),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to send email.");
+      }
+  
+      setEmailSent(true);
+    } catch (e: unknown) {
+      setEmailSent(false);
+      setError(e instanceof Error ? e.message : "Failed to send email.");
+    }
+  };
   const busy = status === "submitting" || status === "processing";
   const showInput = status === "idle" || status === "error";
 
@@ -457,7 +502,7 @@ export default function FreeUrlToPdf() {
                         flex: "0 0 80%",
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
                         fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
-                        background: "#ff7524",
+                        background: "#f16625",
                         border: "0.5px solid rgba(255,255,255,0.85)",
                         // boxShadow: "0 5px 15px -20px #ff7524",
                       }}
@@ -473,8 +518,8 @@ export default function FreeUrlToPdf() {
                       style={{
                         flex: "0 0 calc(20% - 0.6rem)",
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
-                        background: "#ff7524",
-                        border: "1px solid rgba(255,255,255,0.85)",
+                        background: "#f16625",
+                
                         boxShadow: "0 10px 30px -10px #ff7524",
                       }}
                     >
@@ -500,7 +545,7 @@ export default function FreeUrlToPdf() {
                     />
                     <button
                       type="button"
-                      onClick={() => { if (emailValue.trim()) setEmailSent(true); }}
+                      onClick={handleSendEmail}
                       title="Send to email"
                       className="rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center"
                       style={{
