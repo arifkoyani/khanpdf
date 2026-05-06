@@ -11,7 +11,7 @@ const navItems = [
   { to: "/blog", label: "Blog" },
 ] as const;
 
-export function Navbar() {
+export default function Navbar() {
   const pathname = usePathname();
 
   return (
