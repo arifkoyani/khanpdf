@@ -234,18 +234,19 @@ export default function UrlToPdf() {
         <div className="absolute inset-0 grid-bg pointer-events-none" />
 
         <section
-          className="relative mx-auto flex flex-col items-center justify-center px-[5vw]"
+          className="relative mx-auto flex flex-col items-center justify-start px-[5vw]"
           style={{ minHeight: "calc(100vh - 3.5rem)", paddingTop: "4vh", paddingBottom: "6vh" }}
         >
           {/* Heading — kept as-is per request */}
-          <div className="text-center" style={{ marginBottom: "4vh", maxWidth: "min(90vw, 640px)" }}>
+          <div className="text-center mt-10" style={{ marginBottom: "4vh", maxWidth: "min(90vw, 640px)" }}>
             <h1 className="font-display font-bold tracking-tight" style={{ fontSize: "clamp(1.75rem, 4.5vw, 2.5rem)" }}>
               Paste a URL — get a <span className="text-gradient">PDF</span>
             </h1>
-            <p className="text-muted-foreground mx-auto" style={{ marginTop: "1.5vh", fontSize: "clamp(0.85rem, 1.4vw, 0.95rem)", maxWidth: "min(90vw, 480px)" }}>
-              Drop any public webpage link below. We'll convert it to a clean,
-              downloadable PDF in seconds.
-            </p>
+            <h2 className="text-muted-foreground mx-auto" style={{ marginTop: "1.5vh", fontSize: "clamp(0.85rem, 1.4vw, 0.95rem)", maxWidth: "min(90vw, 480px)" }}>
+            Drop any public webpage link below and turn it into a clean, professional PDF.
+Download, open, or share your converted PDF in just a few seconds.
+
+            </h2>
           </div>
 
           {/* Tool card */}
@@ -255,6 +256,7 @@ export default function UrlToPdf() {
               maxWidth: "min(92vw, 560px)",
               padding: "clamp(1.25rem, 3vw, 2rem)",
               minHeight: "clamp(18rem, 38vh, 24rem)",
+                marginTop: "12rem"
             }}
           >
             {/* IDLE / INPUT */}
