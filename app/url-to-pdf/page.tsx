@@ -1,9 +1,10 @@
-import FreeUrlToPdf from "../components/freeurltopdf/FreeUrlToPdf"
+import UrlToPdf from "../components/urltopdf/UrlToPdf";
+
 export default function UrltoPdf(){
 
     return(
         <>
-        <FreeUrlToPdf/>
+        <UrlToPdf/>
         </>
     )
 }
