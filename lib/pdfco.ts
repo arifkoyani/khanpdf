@@ -6,7 +6,7 @@ interface PdfCoResponse {
   message?: string;
 }
 
-// Calls PDF.co synchronously (async:false) and returns the final PDF URL directly.
+// Calls khanpdf synchronously (async:false) and returns the final PDF URL directly.
 // Throws on any error so callers can handle failure uniformly.
 export async function submitPdfJob(url: string): Promise<string> {
   const response = await fetch(process.env.KHAN_PDF_API_URL_TO_PDF_URL!, {
@@ -18,22 +18,23 @@ export async function submitPdfJob(url: string): Promise<string> {
     body: JSON.stringify({
       url,
       name: "khanpdf.pdf",
+      "header": "<span style='font-size:10px; display:block; width:100%; text-align:center;'>Create by <a href='https://khanpdf.com' style='color:#f16625;text-decoration:none'>khanpdf.com</a></span>",
       async: false,
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`PDF.co returned ${response.status}: ${response.statusText}`);
+    throw new Error(`khanpdf returned ${response.status}: ${response.statusText}`);
   }
 
   const data: PdfCoResponse = await response.json();
 
   if (data.error) {
-    throw new Error(`PDF.co error: ${data.message ?? "unknown"}`);
+    throw new Error(`khanpdf error: ${data.message ?? "unknown"}`);
   }
 
   if (!data.url) {
-    throw new Error("PDF.co returned no URL in response");
+    throw new Error("khanpdf returned no URL in response");
   }
 
   return data.url;

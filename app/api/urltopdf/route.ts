@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     // flowControl lets QStash enforce FLOW_RATE deliveries/sec to /submit.
-    // PDF.co is never called here — the intake always returns instantly.
+    // khanpdf is never called here — the intake always returns instantly.
     await qstash.publishJSON({
       url: `${APP_BASE_URL}/api/urltopdf/submit`,
       body: { requestId, url },

@@ -78,7 +78,7 @@ if (!email || !fileUrl) {
     
                     <div style="text-align:center;margin:28px 0 8px;">
                       <a 
-                        href="https://khanpdf.com/" 
+                        href="https://khankhanpdfm/" 
                         target="_blank"
                         style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:13px 24px;border-radius:10px;"
                       >
@@ -97,8 +97,8 @@ if (!email || !fileUrl) {
                     <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">
                       Fast URL to PDF conversion, built for simple online use.
                     </p>
-                    <a href="https://khanpdf.com/" target="_blank" style="color:#f16625;text-decoration:none;font-size:13px;font-weight:700;">
-                      khanpdf.com
+                    <a href="https://khankhanpdfm/" target="_blank" style="color:#f16625;text-decoration:none;font-size:13px;font-weight:700;">
+                      khankhanpdfm
                     </a>
                   </td>
                 </tr>

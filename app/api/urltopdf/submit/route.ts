@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     console.warn(`[submit] Redis processing-save failed for ${requestId}:`, err);
   }
 
-  // Call PDF.co with retries — rate is controlled by QStash flowControl upstream
+  // Call khanpdf with retries — rate is controlled by QStash flowControl upstream
   let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       lastError = err;
       console.warn(
-        `[submit] PDF.co attempt ${attempt}/${MAX_RETRIES} failed for ${requestId}:`,
+        `[submit] khanpdf attempt ${attempt}/${MAX_RETRIES} failed for ${requestId}:`,
         err
       );
       if (attempt < MAX_RETRIES) {
@@ -98,5 +98,5 @@ export async function POST(req: NextRequest) {
       { ex: DONE_TTL }
     );
   } catch {}
-  return NextResponse.json({ ok: true, error: "PDF.co failed after retries" });
+  return NextResponse.json({ ok: true, error: "khanpdf failed after retries" });
 }
