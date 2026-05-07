@@ -1,5 +1,5 @@
 import { Sparkles, ShieldCheck, Zap } from "lucide-react";
-import  Link from "next/link";
+import Link from "next/link";
 import { Button } from "../../ui/button";
 
 export function Hero() {
@@ -19,17 +19,17 @@ export function Hero() {
           Paste any public webpage URL and convert it into a clean, downloadable PDF file in seconds. No sign-up, no installation, and no extra steps.
         </p>
         <div className="mt-7 flex flex-col sm:flex-row gap-2 justify-center">
-  <Button asChild className="h-11 px-8 rounded-lg">
-    <Link href="/free-url-to-pdf">Try it now — Free</Link>
-  </Button>
+          <Button asChild className="h-11 px-8 rounded-lg">
+            <Link href="/url-to-pdf">Try it now — Free</Link>
+          </Button>
 
-  <Button
-    asChild
-    className="h-11 px-8 rounded-lg border border-foreground/15 bg-[#f7f9fa] hover:bg-foreground hover:text-background"
-  >
-    <a href="#how">See how it works</a>
-  </Button>
-</div>
+          <Button
+            asChild
+            className="h-11 px-8 rounded-lg border border-foreground/15 bg-[#f7f9fa] hover:bg-foreground hover:text-background"
+          >
+            <a href="#how">See how it works</a>
+          </Button>
+        </div>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary" /> 100% Free</span>
           <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-primary" /> No Sign-up</span>

@@ -1,5 +1,5 @@
 import { Link2, FileText, ArrowRight } from "lucide-react";
-import  Link  from "next/link";
+import Link from "next/link";
 import { Button } from "../../ui/button";
 
 export function ToolCard() {
@@ -26,10 +26,10 @@ export function ToolCard() {
               </p>
             </div>
             <Button asChild className="rounded-lg">
-  <Link href="/free-url-to-pdf">
-    Convert Now <ArrowRight className="h-3.5 w-3.5" />
-  </Link>
-</Button>
+              <Link href="/url-to-pdf">
+                Convert Now <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
