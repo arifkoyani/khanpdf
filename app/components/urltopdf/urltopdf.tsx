@@ -202,8 +202,6 @@ export default function UrlToPdf() {
         },
         body:JSON.stringify({
           email: emailValue.trim(),
-          subject: "Your converted PDF is ready",
-          body: "Your PDF has been converted successfully.",
           fileUrl,
         })
         

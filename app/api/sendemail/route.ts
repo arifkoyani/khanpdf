@@ -5,12 +5,12 @@ export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, subject, body, fileUrl } = await req.json();
+    const { email, fileUrl } = await req.json();
 
   
-if (!email || !subject || !body || !fileUrl) {
+if (!email || !fileUrl) {
   return NextResponse.json(
-    { success: false, error: "Email, subject, body, and fileUrl are required." },
+    { success: false, error: "Email and fileUrl are required." },
     { status: 400 }
   );
 }
@@ -28,8 +28,8 @@ if (!email || !subject || !body || !fileUrl) {
     await transporter.sendMail({
       from: `"${process.env.SMTP_FROM_NAME || "KhanPDF"}" <${process.env.SMTP_FROM}>`,
       to: email,
-      subject,
-      text: body,
+      subject:"Your converted PDF is ready",
+      text: "Your PDF has been converted successfully.",
       html: `
       <div style="margin:0;padding:0;background:#f6f7fb;font-family:Arial,Helvetica,sans-serif;color:#111827;">
         <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6f7fb;padding:32px 12px;">
