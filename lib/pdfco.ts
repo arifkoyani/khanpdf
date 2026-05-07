@@ -17,7 +17,7 @@ export async function submitPdfJob(url: string): Promise<string> {
     },
     body: JSON.stringify({
       url,
-      name: "khanpdf.pdf",
+      name: "www.khanpdf.com.pdf",
       "header": "<span style='font-size:10px; display:block; width:100%; text-align:center;'>Create by <a href='https://khanpdf.com' style='color:#f16625;text-decoration:none'>khanpdf.com</a></span>",
       async: false,
     }),
