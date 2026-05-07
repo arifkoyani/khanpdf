@@ -3,6 +3,7 @@ import redis from "@/lib/redis";
 import { qstash } from "@/lib/qstash";
 import { generateRequestId } from "@/lib/ids";
 import { enqueueJob, type JobData } from "@/lib/queue";
+import type { PdfJobOptions } from "@/lib/pdfco";
 
 const APP_BASE_URL = (process.env.APP_BASE_URL ?? "").replace(/\/$/, "");
 const JOB_TTL = 3600;
@@ -11,7 +12,12 @@ const FLOW_RATE = Number(process.env.KHANPDF_RATE_LIMIT_PER_SECOND ?? 2);
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { url } = body as { url?: string };
+    const { url, margins, paperSize, orientation } = body as {
+      url?: string;
+      margins?: string;
+      paperSize?: string;
+      orientation?: string;
+    };
 
     if (!url || typeof url !== "string") {
       return NextResponse.json({ error: "url is required" }, { status: 400 });
@@ -22,10 +28,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid URL format" }, { status: 400 });
     }
 
+    const pdfOptions: PdfJobOptions = {
+      ...(margins     && { margins }),
+      ...(paperSize   && { paperSize }),
+      ...(orientation && { orientation }),
+    };
+
     const requestId = generateRequestId();
     const job: JobData = {
       requestId,
       url,
+      pdfOptions,
       status: "queued",
       retries: 0,
       createdAt: Date.now(),
@@ -47,7 +60,7 @@ export async function POST(req: NextRequest) {
     // khanpdf is never called here — the intake always returns instantly.
     await qstash.publishJSON({
       url: `${APP_BASE_URL}/api/urltopdf/submit`,
-      body: { requestId, url },
+      body: { requestId, url, pdfOptions },
       flowControl: {
         key: "pdfco-rate",
         ratePerSecond: FLOW_RATE,

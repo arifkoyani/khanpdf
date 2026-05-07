@@ -1,4 +1,5 @@
 import redis from "./redis";
+import type { PdfJobOptions } from "./pdfco";
 
 const QUEUE_KEY = "urltopdf:queue";
 
@@ -7,6 +8,7 @@ export type JobStatus = "queued" | "processing" | "done" | "failed";
 export interface JobData {
   requestId: string;
   url: string;
+  pdfOptions: PdfJobOptions;
   status: JobStatus;
   jobId?: string;
   fileUrl?: string;

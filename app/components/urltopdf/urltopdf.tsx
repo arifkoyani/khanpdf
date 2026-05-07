@@ -43,11 +43,11 @@ export default function UrlToPdf() {
   const [emailValue, setEmailValue] = useState("");
   const [emailSent, setEmailSent] = useState(false);
 
-  // PDF settings (UI only — not sent to API)
+  // PDF settings — sent to API on convert
   const [marginTop, setMarginTop] = useState("10mm");
-  const [marginRight, setMarginRight] = useState("5mm");
-  const [marginBottom, setMarginBottom] = useState("15mm");
-  const [marginLeft, setMarginLeft] = useState("5mm");
+  const [marginRight, setMarginRight] = useState("0mm");
+  const [marginBottom, setMarginBottom] = useState("0mm");
+  const [marginLeft, setMarginLeft] = useState("0mm");
   const [paperSize, setPaperSize] = useState("A4");
   const [orientation, setOrientation] = useState<"Portrait" | "Landscape">("Portrait");
 
@@ -84,22 +84,22 @@ export default function UrlToPdf() {
 
   const pollStatus = async (requestId: string) => {
     stopTimers();
-  
+
     pollRef.current = window.setInterval(async () => {
       try {
         const res = await fetch(
           `${API_BASE}/status?requestId=${encodeURIComponent(requestId)}`
         );
-  
+
         const data = await res.json();
         const item = Array.isArray(data) ? data[0] : data;
-  
+
         if (item?.status === "done" && item?.fileUrl) {
           stopTimers();
           setStatus("done");
           setFileUrl(item.fileUrl);
         }
-  
+
         if (
           item?.status === "failed" ||
           item?.status === "error" ||
@@ -120,29 +120,34 @@ export default function UrlToPdf() {
   const handleConvert = async () => {
     setError(null);
     setFileUrl(null);
-  
+
     if (!valid) return;
-  
+
     setStatus("submitting");
-  
+
     try {
       const res = await fetch(API_BASE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({
+          url: url.trim(),
+          margins: `${marginTop} ${marginRight} ${marginBottom} ${marginLeft}`,
+          paperSize,
+          orientation,
+        }),
       });
-  
+
       const data = await res.json();
       const item = Array.isArray(data) ? data[0] : data;
-  
+
       if (!item?.requestId) {
         throw new Error("Request ID not found");
       }
-  
+
       setStatus("processing");
-  
+
       // backend gives requestId, frontend uses it to fetch final result
       pollStatus(item.requestId);
     } catch (e: unknown) {
@@ -186,33 +191,33 @@ export default function UrlToPdf() {
       setError("PDF URL not found.");
       return;
     }
-  
+
     if (!emailValue.trim()) {
       setError("Please enter your email.");
       return;
     }
-  
+
     try {
       setError(null);
-  
+
       const res = await fetch("/api/sendemail", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body:JSON.stringify({
+        body: JSON.stringify({
           email: emailValue.trim(),
           fileUrl,
         })
-        
+
       });
       setEmailValue("")
       const data = await res.json();
-  
+
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to send email.");
       }
-  
+
       setEmailSent(true);
       setEmailValue("");
     } catch (e: unknown) {
@@ -225,7 +230,7 @@ export default function UrlToPdf() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-   
+
 
       <main className="relative">
         <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
@@ -241,8 +246,8 @@ export default function UrlToPdf() {
               Paste a URL — get a <span className="text-gradient">PDF</span>
             </h1>
             <h2 className="text-muted-foreground mx-auto" style={{ marginTop: "1.5vh", fontSize: "clamp(0.85rem, 1.4vw, 0.95rem)", maxWidth: "min(90vw, 480px)" }}>
-            Drop any public webpage link below and turn it into a clean, professional PDF.
-Download, open, or share your converted PDF in just a few seconds.
+              Drop any public webpage link below and turn it into a clean, professional PDF.
+              Download, open, or share your converted PDF in just a few seconds.
 
             </h2>
           </div>
@@ -254,7 +259,7 @@ Download, open, or share your converted PDF in just a few seconds.
               maxWidth: "min(92vw, 560px)",
               padding: "clamp(1.25rem, 3vw, 2rem)",
               minHeight: "clamp(18rem, 38vh, 24rem)",
-                marginTop: "4rem"
+              marginTop: "4rem"
             }}
           >
             {/* IDLE / INPUT */}
@@ -293,9 +298,8 @@ Download, open, or share your converted PDF in just a few seconds.
                     />
                     {/* Animated validation tick */}
                     <div
-                      className={`absolute right-[1rem] top-1/2 -translate-y-1/2 grid place-items-center rounded-full bg-[oklch(0.62_0.18_250)] text-white transition-all duration-300 ${
-                        valid ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                      }`}
+                      className={`absolute right-[1rem] top-1/2 -translate-y-1/2 grid place-items-center rounded-full bg-[oklch(0.62_0.18_250)] text-white transition-all duration-300 ${valid ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                        }`}
                       style={{
                         height: "clamp(1.5rem, 2.6vw, 1.85rem)",
                         width: "clamp(1.5rem, 2.6vw, 1.85rem)",
@@ -316,9 +320,8 @@ Download, open, or share your converted PDF in just a few seconds.
 
                 {/* PDF Settings — appears once URL is valid */}
                 <div
-                  className={`w-full transition-all duration-300 overflow-hidden ${
-                    valid ? "opacity-100 max-h-[1000px]" : "opacity-0 max-h-0 pointer-events-none"
-                  }`}
+                  className={`w-full transition-all duration-300 overflow-hidden ${valid ? "opacity-100 max-h-[1000px]" : "opacity-0 max-h-0 pointer-events-none"
+                    }`}
                 >
                   <div className="flex flex-col" style={{ gap: "1.8vh" }}>
                     <h3 className="font-semibold" style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)" }}>
@@ -399,11 +402,10 @@ Download, open, or share your converted PDF in just a few seconds.
                               key={o}
                               type="button"
                               onClick={() => setOrientation(o)}
-                              className={`rounded-lg border transition-all inline-flex items-center justify-center gap-2 ${
-                                active
-                                  ? "border-[oklch(0.62_0.18_250)] bg-[oklch(0.62_0.18_250/0.1)] text-foreground"
-                                  : "border-border bg-background/40 text-muted-foreground hover:text-foreground"
-                              }`}
+                              className={`rounded-lg border transition-all inline-flex items-center justify-center gap-2 ${active
+                                ? "border-[oklch(0.62_0.18_250)] bg-[oklch(0.62_0.18_250/0.1)] text-foreground"
+                                : "border-border bg-background/40 text-muted-foreground hover:text-foreground"
+                                }`}
                               style={{
                                 height: "clamp(3rem, 7vh, 3.5rem)",
                                 fontSize: "clamp(0.85rem, 1.3vw, 0.95rem)",
@@ -514,7 +516,7 @@ Download, open, or share your converted PDF in just a few seconds.
                         flex: "0 0 calc(20% - 0.6rem)",
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
                         background: "#f16625",
-                
+
                         boxShadow: "0 10px 30px -10px #ff7524",
                       }}
                     >

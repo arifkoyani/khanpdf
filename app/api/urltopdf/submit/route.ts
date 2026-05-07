@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import redis from "@/lib/redis";
 import { qstashReceiver } from "@/lib/qstash";
 import { submitPdfJob } from "@/lib/pdfco";
+import type { PdfJobOptions } from "@/lib/pdfco";
 import type { JobData } from "@/lib/queue";
 
 const JOB_TTL = 3600;
@@ -19,9 +20,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { requestId, url } = JSON.parse(rawBody) as {
+  const { requestId, url, pdfOptions } = JSON.parse(rawBody) as {
     requestId: string;
     url: string;
+    pdfOptions?: PdfJobOptions;
   };
 
   if (!requestId || !url) {
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!job) {
-    job = { requestId, url, status: "queued", retries: 0, createdAt: Date.now() };
+    job = { requestId, url, pdfOptions: pdfOptions ?? {}, status: "queued", retries: 0, createdAt: Date.now() };
     try {
       await redis.set(`job:${requestId}`, job, { ex: JOB_TTL });
     } catch (err) {
@@ -64,7 +66,7 @@ export async function POST(req: NextRequest) {
   let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const fileUrl = await submitPdfJob(job.url);
+      const fileUrl = await submitPdfJob(job.url, job.pdfOptions ?? pdfOptions ?? {});
       try {
         await redis.set(
           `job:${requestId}`,
