@@ -256,7 +256,7 @@ Download, open, or share your converted PDF in just a few seconds.
               maxWidth: "min(92vw, 560px)",
               padding: "clamp(1.25rem, 3vw, 2rem)",
               minHeight: "clamp(18rem, 38vh, 24rem)",
-                marginTop: "2rem"
+                marginTop: "4rem"
             }}
           >
             {/* IDLE / INPUT */}
