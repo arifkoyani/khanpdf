@@ -99,6 +99,6 @@ export async function POST(req: NextRequest) {
       { ...job, status: "failed" },
       { ex: DONE_TTL }
     );
-  } catch {}
+  } catch { }
   return NextResponse.json({ ok: true, error: "khanpdf failed after retries" });
 }
