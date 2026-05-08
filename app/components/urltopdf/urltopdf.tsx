@@ -184,19 +184,16 @@ export default function UrlToPdf() {
   };
 
   const handleOpen = () => {
-    console.log("PDF URL:", fileUrl);
-
-    if (!fileUrl) {
-      alert("PDF is not ready yet");
-      return;
-    }
+    if (!fileUrl) return;
 
     const newTab = window.open(fileUrl, "_blank");
 
-    if (!newTab) {
-      alert("Popup blocked. Please allow popups for this site.");
+    if (newTab) {
+      newTab.opener = null;
+    } else {
+      window.location.href = fileUrl;
     }
-  };
+  };;
   const handleSendEmail = async () => {
     if (!fileUrl) {
       setError("PDF URL not found.");
@@ -461,10 +458,10 @@ export default function UrlToPdf() {
                       height: "clamp(3rem, 7vh, 3.5rem)",
                       fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
                       background: "#f16625",
-                      boxShadow: "0 10px 30px -10px #f16625",
+                      boxShadow: "0 10px 30px -20px #ff550d",
                     }}
                   >
-                    Convert to PDF
+                    Start Converting Now
                   </button>
                 </div>
               </div>
@@ -571,7 +568,7 @@ export default function UrlToPdf() {
                         ) : emailSent ? (
                           <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3, color: "oklch(0.7 0.18 145)" }} />
                         ) : (
-                          <span style={{ color: "oklch(0.7 0.18 145)" }}>Send</span>
+                          "Send"
                         )}
                       </button>
                     </div>
