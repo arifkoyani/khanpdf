@@ -22,7 +22,15 @@ export default function OpenPdfViewer() {
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const [remainingSeconds, setRemainingSeconds] = useState(3600);
+    const [expiresAt] = useState(() => Date.now() + 60 * 60 * 1000);
+    const [now, setNow] = useState(() => Date.now());
+
+    const remainingSeconds = Math.max(
+        0,
+        Math.floor((expiresAt - now) / 1000)
+    );
+
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const viewerTitle = useMemo(() => {
         if (!requestId) return "PDF Viewer";
@@ -95,7 +103,7 @@ export default function OpenPdfViewer() {
 
     useEffect(() => {
         const timer = window.setInterval(() => {
-            setRemainingSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+            setNow(Date.now());
         }, 1000);
 
         return () => window.clearInterval(timer);
@@ -109,6 +117,17 @@ export default function OpenPdfViewer() {
             2,
             "0"
         )}`;
+    };
+    const formatLocalDateTime = (timestamp: number) => {
+        return new Intl.DateTimeFormat(undefined, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            timeZoneName: "short",
+        }).format(new Date(timestamp));
     };
 
     const handleDownload = async () => {
@@ -365,20 +384,53 @@ export default function OpenPdfViewer() {
                                 now to keep a copy.
                             </p>
 
-                            <p
-                                style={{
-                                    margin: "12px 0 0",
-                                    color: "#ff550d",
-                                    fontWeight: 800,
-                                    fontSize: "16px",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                }}
-                            >
-                                <Clock size={17} />
-                                File expires in: {formatTime(remainingSeconds)}
-                            </p>
+                            <div style={{ marginTop: "12px" }}>
+                                <p
+                                    style={{
+                                        margin: 0,
+                                        color: "#ff550d",
+                                        fontWeight: 800,
+                                        fontSize: "16px",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                    }}
+                                >
+                                    <Clock size={17} />
+                                    File expires in: {formatTime(remainingSeconds)}
+                                </p>
+
+                                <p
+                                    style={{
+                                        margin: "8px 0 0",
+                                        color: "#6b7280",
+                                        fontSize: "14px",
+                                    }}
+                                >
+                                    Your current local time: {formatLocalDateTime(now)}
+                                </p>
+
+                                <p
+                                    style={{
+                                        margin: "4px 0 0",
+                                        color: "#6b7280",
+                                        fontSize: "14px",
+                                    }}
+                                >
+                                    PDF expiry time: {formatLocalDateTime(expiresAt)}
+                                </p>
+
+                                <p
+                                    style={{
+                                        margin: "4px 0 0",
+                                        color: "#6b7280",
+                                        fontWeight: 600,
+                                        fontSize: "13px",
+                                    }}
+                                >
+                                    Timezone: {userTimeZone}
+                                </p>
+                            </div>
                         </div>
 
                         <div
