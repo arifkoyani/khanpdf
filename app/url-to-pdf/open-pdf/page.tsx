@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import OpenPdfViewer from "../components/OpenPdfViewer/OpenPdfViewer";
+import OpenPdfViewer from "../../components/OpenPdfViewer/OpenPdfViewer";
+
 
 export const dynamic = "force-dynamic";
 

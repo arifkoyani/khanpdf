@@ -1,795 +1,488 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     Download,
-    RotateCcw,
     ExternalLink,
     Share2,
+    RotateCcw,
     Clock,
-    CheckCircle2,
+    ShieldCheck,
+    Zap,
+    Globe,
+    FileText,
+    Link2,
+    Check,
 } from "lucide-react";
+import Spinner from "../ui/Spinner";
+// import Spinner from "@/components/ui/Spinner";
 
-type PdfStatus = "loading" | "processing" | "done" | "error";
+
+
+
+type Status = "loading" | "processing" | "done" | "error";
+
+const BRAND = "#ff550d";
+const STATUS_API = "/api/urltopdf/status";
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
+function formatCountdown(ms: number) {
+    if (ms <= 0) return "00:00:00";
+    const total = Math.floor(ms / 1000);
+    const h = String(Math.floor(total / 3600)).padStart(2, "0");
+    const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+    const s = String(total % 60).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+}
+
+function formatLocal(date: Date) {
+    return new Intl.DateTimeFormat(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZoneName: "short",
+    }).format(date);
+}
+
 
 export default function OpenPdfViewer() {
     const searchParams = useSearchParams();
-    const requestId = searchParams.get("requestId");
-
-    const [status, setStatus] = useState<PdfStatus>("loading");
+    const requestId = searchParams.get("requestId") || "";
+    const [status, setStatus] = useState<Status>("loading");
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [now, setNow] = useState<Date>(() => new Date());
+    const [expiresAt, setExpiresAt] = useState<Date | null>(null);
+    const [copied, setCopied] = useState(false);
+    const pollRef = useRef<number | null>(null);
+    const tickRef = useRef<number | null>(null);
 
-    const [expiresAt] = useState(() => Date.now() + 60 * 60 * 1000);
-    const [now, setNow] = useState(() => Date.now());
-
-    const remainingSeconds = Math.max(
-        0,
-        Math.floor((expiresAt - now) / 1000)
-    );
-
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    const viewerTitle = useMemo(() => {
-        if (!requestId) return "PDF Viewer";
-        return `PDF Viewer - ${requestId}`;
-    }, [requestId]);
-
+    // Poll status
     useEffect(() => {
         if (!requestId) {
             setStatus("error");
-            setError("Request ID is missing.");
+            setError("Missing requestId in URL.");
             return;
         }
+        let cancelled = false;
+        let inFlight = false;
+        let failures = 0;
 
-        let intervalId: number | null = null;
-
-        const stopPolling = () => {
-            if (intervalId) {
-                window.clearInterval(intervalId);
-                intervalId = null;
-            }
-        };
-
-        const fetchFinalPdf = async () => {
+        const poll = async () => {
+            if (inFlight || cancelled) return;
+            inFlight = true;
             try {
                 const res = await fetch(
-                    `/api/urltopdf/status?requestId=${encodeURIComponent(requestId)}`,
-                    {
-                        cache: "no-store",
-                    }
+                    `${STATUS_API}?requestId=${encodeURIComponent(requestId)}`,
+                    { cache: "no-store" },
                 );
-
-                const data = await res.json();
-                const item = Array.isArray(data) ? data[0] : data;
-
-                if (item?.status === "done" && item?.fileUrl) {
-                    setStatus("done");
-                    setFileUrl(item.fileUrl);
-                    stopPolling();
-                    return;
-                }
-
-                if (item?.status === "processing" || item?.status === "queued") {
-                    setStatus("processing");
-                    return;
-                }
-
-                if (
-                    item?.status === "failed" ||
-                    item?.status === "error" ||
-                    item?.status === "not_found"
+                if (!res.ok) throw new Error(`Status ${res.status}`);
+                const json = await res.json();
+                const item = Array.isArray(json) ? json[0] : json;
+                const s = item?.status;
+                failures = 0;
+                if (s === "done" && item?.fileUrl) {
+                    if (!cancelled) {
+                        setFileUrl(item.fileUrl as string);
+                        setStatus("done");
+                        setExpiresAt(new Date(Date.now() + ONE_HOUR_MS));
+                    }
+                    if (pollRef.current) {
+                        window.clearInterval(pollRef.current);
+                        pollRef.current = null;
+                    }
+                } else if (
+                    s === "failed" ||
+                    s === "error" ||
+                    s === "not_found" ||
+                    item?.success === false
                 ) {
-                    setStatus("error");
-                    setError("PDF not found, failed, or expired.");
-                    stopPolling();
+                    if (!cancelled) {
+                        setStatus("error");
+                        setError(item?.message || "Conversion failed or not found.");
+                    }
+                    if (pollRef.current) {
+                        window.clearInterval(pollRef.current);
+                        pollRef.current = null;
+                    }
+                } else {
+                    if (!cancelled) setStatus("processing");
                 }
-            } catch {
-                setStatus("error");
-                setError("Unable to load PDF.");
-                stopPolling();
+            } catch (e) {
+                failures += 1;
+                if (failures >= 10 && !cancelled) {
+                    setStatus("error");
+                    setError(e instanceof Error ? e.message : "Network error.");
+                    if (pollRef.current) {
+                        window.clearInterval(pollRef.current);
+                        pollRef.current = null;
+                    }
+                }
+            } finally {
+                inFlight = false;
             }
         };
 
-        fetchFinalPdf();
-        intervalId = window.setInterval(fetchFinalPdf, 1000);
-
+        void poll();
+        pollRef.current = window.setInterval(poll, 1000);
         return () => {
-            stopPolling();
+            cancelled = true;
+            if (pollRef.current) window.clearInterval(pollRef.current);
         };
     }, [requestId]);
 
+    // Live clock / countdown
     useEffect(() => {
-        const timer = window.setInterval(() => {
-            setNow(Date.now());
-        }, 1000);
-
-        return () => window.clearInterval(timer);
+        tickRef.current = window.setInterval(() => setNow(new Date()), 1000);
+        return () => {
+            if (tickRef.current) window.clearInterval(tickRef.current);
+        };
     }, []);
 
-    const formatTime = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-
-        return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
-            2,
-            "0"
-        )}`;
-    };
-    const formatLocalDateTime = (timestamp: number) => {
-        return new Intl.DateTimeFormat(undefined, {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            timeZoneName: "short",
-        }).format(new Date(timestamp));
-    };
+    const remaining = useMemo(() => {
+        if (!expiresAt) return ONE_HOUR_MS;
+        return expiresAt.getTime() - now.getTime();
+    }, [expiresAt, now]);
 
     const handleDownload = async () => {
         if (!fileUrl) return;
-
         try {
             const res = await fetch(fileUrl);
             const blob = await res.blob();
-
-            const objectUrl = URL.createObjectURL(blob);
+            const objUrl = URL.createObjectURL(blob);
             const a = document.createElement("a");
-
-            a.href = objectUrl;
-            a.download = "khanpdf-converted.pdf";
-
+            a.href = objUrl;
+            a.download = `khanpdf-${requestId}.pdf`;
             document.body.appendChild(a);
             a.click();
             a.remove();
-
-            URL.revokeObjectURL(objectUrl);
+            URL.revokeObjectURL(objUrl);
         } catch {
-            window.open(fileUrl, "_blank");
+            window.open(fileUrl, "_blank", "noopener,noreferrer");
         }
     };
 
-    const handleOpenDirect = () => {
-        if (!fileUrl) return;
-        window.open(fileUrl, "_blank");
-    };
-
-    const handleShareTool = async () => {
+    const handleShare = async () => {
         const shareUrl = "https://khanpdf.com/";
-
         try {
             if (navigator.share) {
                 await navigator.share({
-                    title: "KhanPDF - Convert URL to PDF",
-                    text: "Convert any public URL into a clean PDF online.",
+                    title: "KhanPDF — URL to PDF",
+                    text: "Convert any public webpage into a clean PDF in seconds.",
                     url: shareUrl,
                 });
-            } else {
-                await navigator.clipboard.writeText(shareUrl);
-                alert("KhanPDF link copied!");
+                return;
             }
         } catch {
+            // fall through to copy
+        }
+        try {
             await navigator.clipboard.writeText(shareUrl);
-            alert("KhanPDF link copied!");
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 1800);
+        } catch {
+            window.open(shareUrl, "_blank", "noopener,noreferrer");
         }
     };
 
     return (
-        <main
-            style={{
-                minHeight: "100vh",
-                background: "#f8fafc",
-                color: "#111827",
-            }}
-        >
-            <header
-                style={{
-                    height: "64px",
-                    padding: "0 24px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    borderBottom: "1px solid #e5e7eb",
-                    background: "#ffffff",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 20,
-                }}
-            >
-                <div>
-                    <strong style={{ fontSize: "20px" }}>KhanPDF</strong>
-                    <p style={{ margin: 0, fontSize: "13px", color: "#6b7280" }}>
-                        Your converted PDF is ready to view
-                    </p>
-                </div>
+        <div className="min-h-screen bg-background text-foreground">
 
-                <button
-                    type="button"
-                    onClick={() => {
-                        window.location.href = "/";
-                    }}
-                    style={{
-                        border: "none",
-                        borderRadius: "10px",
-                        background: "#ff550d",
-                        color: "#ffffff",
-                        padding: "10px 16px",
-                        fontWeight: 700,
-                        cursor: "pointer",
-                    }}
-                >
-                    Convert Another URL
-                </button>
-            </header>
+            <main className="mx-auto max-w-6xl px-5 py-8 md:py-12 space-y-10 mt-8">
+                {/* Top row: title + actions */}
+                <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight">
+                            Your PDF preview
+                        </h1>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Hosted on KhanPDF — request{" "}
+                            <span className="font-mono text-foreground/80">
+                                {requestId || "—"}
+                            </span>
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Link
+                            href="/"
+                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
+                            style={{
+                                background: BRAND,
+                                border: "1px solid rgba(255,255,255,0.85)",
+                                boxShadow: `0 10px 30px -12px ${BRAND}`,
+                            }}
+                        >
+                            <RotateCcw className="h-4 w-4" /> Convert Another URL
+                        </Link>
+                    </div>
+                </section>
 
-            <section
-                style={{
-                    padding: "16px 24px",
-                    display: "flex",
-                    gap: "12px",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    background: "#ffffff",
-                    borderBottom: "1px solid #e5e7eb",
-                }}
-            >
-                <div>
-                    <h1 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>
-                        PDF Preview
-                    </h1>
-                    <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "14px" }}>
-                        This temporary file may expire after around 1 hour.
-                    </p>
-                </div>
+                {/* Viewer */}
+                <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-elegant mt-8">
 
-                {fileUrl && (
-                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+
+                    <div className="bg-muted/30" style={{ height: "min(78vh, 760px)" }}>
+                        {status === "loading" || status === "processing" ? (
+                            <div className="h-full w-full flex flex-col items-center justify-center gap-4">
+                                <Spinner />
+                                <p className="text-sm text-muted-foreground">
+                                    {status === "loading"
+                                        ? "Loading your PDF…"
+                                        : "Still processing your PDF — this can take a few seconds."}
+                                </p>
+                            </div>
+                        ) : status === "error" ? (
+                            <div className="h-full w-full flex flex-col items-center justify-center gap-3 px-6 text-center">
+                                <div
+                                    className="h-12 w-12 rounded-full grid place-items-center"
+                                    style={{ background: "oklch(0.65 0.2 25 / 0.12)" }}
+                                >
+                                    <FileText
+                                        className="h-6 w-6"
+                                        style={{ color: "oklch(0.65 0.2 25)" }}
+                                    />
+                                </div>
+                                <h2 className="font-semibold text-lg">We couldn't load this PDF</h2>
+                                <p className="text-sm text-muted-foreground max-w-md">
+                                    {error ||
+                                        "This PDF may have expired, the link is invalid, or the conversion did not complete."}
+                                </p>
+                                <Link
+                                    href="/url-to-pdf"
+                                    className="mt-2 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                                    style={{ background: BRAND }}
+                                >
+                                    Try again
+                                </Link>
+                            </div>
+                        ) : fileUrl ? (
+                            <iframe
+                                src={fileUrl}
+                                title="Converted PDF"
+                                className="w-full h-full"
+                                style={{ border: 0, background: "white" }}
+                            />
+                        ) : null}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="px-4 py-4 border-t border-border bg-background/40 flex flex-wrap gap-2 justify-end">
                         <button
                             type="button"
                             onClick={handleDownload}
+                            disabled={!fileUrl}
+                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 transition-all hover:-translate-y-0.5"
                             style={{
-                                border: "none",
-                                borderRadius: "10px",
-                                background: "#ff550d",
-                                color: "#ffffff",
-                                padding: "10px 14px",
-                                fontWeight: 700,
-                                cursor: "pointer",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "8px",
+                                background: BRAND,
+                                border: "1px solid rgba(255,255,255,0.85)",
+                                boxShadow: `0 10px 30px -12px ${BRAND}`,
                             }}
                         >
-                            <Download size={16} />
-                            Download
+                            <Download className="h-4 w-4" /> Download PDF
                         </button>
-
                         <button
                             type="button"
-                            onClick={handleOpenDirect}
-                            style={{
-                                border: "1px solid #d1d5db",
-                                borderRadius: "10px",
-                                background: "#ffffff",
-                                color: "#111827",
-                                padding: "10px 14px",
-                                fontWeight: 700,
-                                cursor: "pointer",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "8px",
-                            }}
+                            onClick={() =>
+                                fileUrl &&
+                                window.open(fileUrl, "_blank", "noopener,noreferrer")
+                            }
+                            disabled={!fileUrl}
+                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-foreground border border-border bg-background/60 disabled:opacity-50 transition-all hover:-translate-y-0.5"
                         >
-                            <ExternalLink size={16} />
-                            Open Direct
+                            <ExternalLink className="h-4 w-4" /> Open Direct
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleShare}
+                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-foreground border border-border bg-background/60 transition-all hover:-translate-y-0.5"
+                        >
+                            {copied ? (
+                                <>
+                                    <Check className="h-4 w-4" /> Link copied
+                                </>
+                            ) : (
+                                <>
+                                    <Share2 className="h-4 w-4" /> Share This Tool
+                                </>
+                            )}
                         </button>
                     </div>
-                )}
-            </section>
+                </section>
 
-            <section style={{ height: "75vh", minHeight: "520px" }}>
-                {status === "loading" && (
-                    <div style={{ padding: "2rem", textAlign: "center" }}>
-                        Loading PDF...
+                {/* Expiry / time info */}
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                    <div className="rounded-xl border border-border bg-card p-4">
+                        <p className="text-xs text-muted-foreground">Current local time</p>
+                        <p className="font-mono text-lg mt-1">{formatLocal(now)}</p>
                     </div>
-                )}
-
-                {status === "processing" && (
-                    <div style={{ padding: "2rem", textAlign: "center" }}>
-                        Your PDF is still processing. Please wait...
-                    </div>
-                )}
-
-                {status === "error" && (
-                    <div
-                        style={{
-                            padding: "2rem",
-                            textAlign: "center",
-                            color: "#dc2626",
-                        }}
-                    >
-                        {error || "Something went wrong."}
-                    </div>
-                )}
-
-                {status === "done" && fileUrl && (
-                    <iframe
-                        src={fileUrl}
-                        title={viewerTitle}
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                            border: "none",
-                            background: "#ffffff",
-                        }}
-                    />
-                )}
-            </section>
-
-            <section
-                style={{
-                    padding: "32px 24px",
-                    background: "#ffffff",
-                    borderTop: "1px solid #e5e7eb",
-                }}
-            >
-                <div
-                    style={{
-                        maxWidth: "1120px",
-                        margin: "0 auto",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "32px",
-                    }}
-                >
-                    <div
-                        style={{
-                            padding: "24px",
-                            borderRadius: "18px",
-                            background: "#fff7ed",
-                            border: "1px solid #fed7aa",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: "18px",
-                            flexWrap: "wrap",
-                        }}
-                    >
-                        <div>
-                            <h2
-                                style={{
-                                    margin: 0,
-                                    fontSize: "22px",
-                                    fontWeight: 800,
-                                    color: "#111827",
-                                }}
-                            >
-                                Your PDF is ready
-                            </h2>
-
-                            <p
-                                style={{
-                                    margin: "8px 0 0",
-                                    color: "#6b7280",
-                                    fontSize: "15px",
-                                    lineHeight: 1.6,
-                                }}
-                            >
-                                Your PDF file is temporary and may expire in 1 hour. Download it
-                                now to keep a copy.
-                            </p>
-
-                            <div style={{ marginTop: "12px" }}>
-                                <p
-                                    style={{
-                                        margin: 0,
-                                        color: "#ff550d",
-                                        fontWeight: 800,
-                                        fontSize: "16px",
-                                        display: "inline-flex",
-                                        alignItems: "center",
-                                        gap: "8px",
-                                    }}
-                                >
-                                    <Clock size={17} />
-                                    File expires in: {formatTime(remainingSeconds)}
-                                </p>
-
-                                <p
-                                    style={{
-                                        margin: "8px 0 0",
-                                        color: "#6b7280",
-                                        fontSize: "14px",
-                                    }}
-                                >
-                                    Your current local time: {formatLocalDateTime(now)}
-                                </p>
-
-                                <p
-                                    style={{
-                                        margin: "4px 0 0",
-                                        color: "#6b7280",
-                                        fontSize: "14px",
-                                    }}
-                                >
-                                    PDF expiry time: {formatLocalDateTime(expiresAt)}
-                                </p>
-
-                                <p
-                                    style={{
-                                        margin: "4px 0 0",
-                                        color: "#6b7280",
-                                        fontWeight: 600,
-                                        fontSize: "13px",
-                                    }}
-                                >
-                                    Timezone: {userTimeZone}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div
-                            style={{
-                                display: "flex",
-                                gap: "10px",
-                                flexWrap: "wrap",
-                            }}
-                        >
-                            <button
-                                type="button"
-                                onClick={handleDownload}
-                                disabled={!fileUrl}
-                                style={{
-                                    border: "none",
-                                    borderRadius: "12px",
-                                    background: "#ff550d",
-                                    color: "#ffffff",
-                                    padding: "12px 18px",
-                                    fontWeight: 800,
-                                    cursor: fileUrl ? "pointer" : "not-allowed",
-                                    opacity: fileUrl ? 1 : 0.6,
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                }}
-                            >
-                                <Download size={16} />
-                                Download PDF
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    window.location.href = "/";
-                                }}
-                                style={{
-                                    border: "1px solid #d1d5db",
-                                    borderRadius: "12px",
-                                    background: "#ffffff",
-                                    color: "#111827",
-                                    padding: "12px 18px",
-                                    fontWeight: 800,
-                                    cursor: "pointer",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                }}
-                            >
-                                <RotateCcw size={16} />
-                                Convert Another URL
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={handleShareTool}
-                                style={{
-                                    border: "1px solid #d1d5db",
-                                    borderRadius: "12px",
-                                    background: "#ffffff",
-                                    color: "#111827",
-                                    padding: "12px 18px",
-                                    fontWeight: 800,
-                                    cursor: "pointer",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                }}
-                            >
-                                <Share2 size={16} />
-                                Share This Tool
-                            </button>
-                        </div>
-                    </div>
-
-                    <div
-                        style={{
-                            padding: "28px",
-                            borderRadius: "18px",
-                            border: "1px solid #e5e7eb",
-                            background: "#f9fafb",
-                        }}
-                    >
-                        <h2
-                            style={{
-                                margin: 0,
-                                fontSize: "24px",
-                                fontWeight: 800,
-                                color: "#111827",
-                            }}
-                        >
-                            Need to save another webpage?
-                        </h2>
-
-                        <p
-                            style={{
-                                margin: "10px 0 0",
-                                color: "#6b7280",
-                                fontSize: "16px",
-                                lineHeight: 1.7,
-                                maxWidth: "760px",
-                            }}
-                        >
-                            KhanPDF lets you convert public webpages, articles, blogs,
-                            reports, documentation pages, and images into clean PDF files in
-                            seconds. No signup required.
+                    <div className="rounded-xl border border-border bg-card p-4">
+                        <p className="text-xs text-muted-foreground">PDF expires at</p>
+                        <p className="font-mono text-lg mt-1">
+                            {expiresAt ? formatLocal(expiresAt) : "—"}
                         </p>
                     </div>
+                    <div
+                        className="rounded-xl p-4 text-white"
+                        style={{
+                            background: `linear-gradient(135deg, ${BRAND}, oklch(0.7 0.2 35))`,
+                        }}
+                    >
+                        <p className="text-xs opacity-90">Time remaining</p>
+                        <p className="font-mono text-lg mt-1">
+                            {formatCountdown(remaining)}
+                        </p>
+                    </div>
+                </section>
 
-                    <div>
-                        <h2
-                            style={{
-                                margin: "0 0 16px",
-                                fontSize: "24px",
-                                fontWeight: 800,
-                                color: "#111827",
-                            }}
-                        >
-                            Popular PDF Tools
-                        </h2>
+                <section className="rounded-xl border border-border bg-card/60 p-4 text-sm text-muted-foreground mt-8">
+                    Your PDF file is temporary and may expire in 1 hour. Download it now
+                    to keep a copy.
+                </section>
 
-                        <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                                gap: "14px",
-                            }}
-                        >
-                            {[
-                                { title: "URL to PDF", href: "/", status: "Available" },
-                                { title: "HTML to PDF", href: "/", status: "Coming Soon" },
-                                { title: "Image to PDF", href: "/", status: "Coming Soon" },
-                                { title: "PDF to QR Code", href: "/", status: "Coming Soon" },
-                                {
-                                    title: "Barcode Generator",
-                                    href: "/",
-                                    status: "Coming Soon",
-                                },
-                            ].map((tool) => (
-                                <a
-                                    key={tool.title}
-                                    href={tool.href}
-                                    style={{
-                                        textDecoration: "none",
-                                        padding: "18px",
-                                        borderRadius: "16px",
-                                        border: "1px solid #e5e7eb",
-                                        background: "#ffffff",
-                                        color: "#111827",
-                                        boxShadow: "0 10px 24px -20px rgba(0,0,0,0.35)",
-                                        display: "block",
-                                    }}
-                                >
-                                    <strong style={{ fontSize: "16px" }}>{tool.title}</strong>
+                {/* Promo */}
+                <section className="rounded-2xl border border-border bg-card p-6 md:p-8 mt-8">
+                    <h2 className="font-display font-bold text-xl md:text-2xl">
+                        Need to save another webpage?
+                    </h2>
+                    <p className="text-muted-foreground mt-2 max-w-2xl">
+                        KhanPDF lets you convert public webpages, articles, blogs, reports,
+                        documentation pages, and images into clean PDF files in seconds. No
+                        signup required.
+                    </p>
+                </section>
 
-                                    <p
+                {/* Popular tools */}
+                <section className="mt-8">
+                    <h2 className="font-display font-bold text-xl md:text-2xl mb-4">
+                        Popular PDF tools
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {[
+                            { name: "URL to PDF", status: "Available", to: "/url-to-pdf" },
+                            { name: "HTML to PDF", status: "Coming Soon" },
+                            { name: "Image to PDF", status: "Coming Soon" },
+                            { name: "PDF to QR Code", status: "Coming Soon" },
+                            { name: "Barcode Generator", status: "Coming Soon" },
+                        ].map((t) => {
+                            const available = t.status === "Available";
+                            const inner = (
+                                <div className="rounded-xl border border-border bg-card p-4 flex items-center justify-between hover:border-foreground/30 transition-colors h-full">
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="h-9 w-9 rounded-lg grid place-items-center"
+                                            style={{ background: `${BRAND}1a`, color: BRAND }}
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                        </div>
+                                        <span className="font-semibold">{t.name}</span>
+                                    </div>
+                                    <span
+                                        className="text-xs px-2 py-1 rounded-full"
                                         style={{
-                                            margin: "8px 0 0",
-                                            color:
-                                                tool.status === "Available" ? "#16a34a" : "#f97316",
-                                            fontSize: "13px",
-                                            fontWeight: 800,
+                                            background: available ? "oklch(0.7 0.18 145 / 0.15)" : "var(--muted)",
+                                            color: available ? "oklch(0.55 0.18 145)" : undefined,
                                         }}
                                     >
-                                        {tool.status}
-                                    </p>
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h2
-                            style={{
-                                margin: "0 0 16px",
-                                fontSize: "24px",
-                                fontWeight: 800,
-                                color: "#111827",
-                            }}
-                        >
-                            Latest from KhanPDF Blog
-                        </h2>
-
-                        <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                                gap: "18px",
-                            }}
-                        >
-                            {[
-                                {
-                                    title: "How to Convert a Webpage to PDF Online",
-                                    desc: "Learn how to save any public webpage as a clean PDF file using KhanPDF.",
-                                    image:
-                                        "https://placehold.co/600x340/ff550d/ffffff?text=Convert+Webpage+to+PDF",
-                                    href: "/blog/how-to-convert-url-to-pdf",
-                                },
-                                {
-                                    title: "Best Way to Save Articles as PDF",
-                                    desc: "A simple guide for saving blogs, articles, and reports as PDF documents.",
-                                    image:
-                                        "https://placehold.co/600x340/111827/ffffff?text=Save+Articles+as+PDF",
-                                    href: "/blog/save-articles-as-pdf",
-                                },
-                                {
-                                    title: "How to Download a Website Page as PDF",
-                                    desc: "Turn public website pages into downloadable PDF files in just a few clicks.",
-                                    image:
-                                        "https://placehold.co/600x340/f97316/ffffff?text=Download+Page+as+PDF",
-                                    href: "/blog/download-website-page-as-pdf",
-                                },
-                            ].map((blog) => (
-                                <article
-                                    key={blog.title}
-                                    style={{
-                                        overflow: "hidden",
-                                        borderRadius: "18px",
-                                        border: "1px solid #e5e7eb",
-                                        background: "#ffffff",
-                                        boxShadow: "0 12px 30px -24px rgba(0,0,0,0.45)",
-                                    }}
-                                >
-                                    <img
-                                        src={blog.image}
-                                        alt={blog.title}
-                                        style={{
-                                            width: "100%",
-                                            height: "160px",
-                                            objectFit: "cover",
-                                            display: "block",
-                                        }}
-                                    />
-
-                                    <div style={{ padding: "18px" }}>
-                                        <h3
-                                            style={{
-                                                margin: 0,
-                                                fontSize: "18px",
-                                                fontWeight: 800,
-                                                color: "#111827",
-                                                lineHeight: 1.35,
-                                            }}
-                                        >
-                                            {blog.title}
-                                        </h3>
-
-                                        <p
-                                            style={{
-                                                margin: "10px 0 16px",
-                                                color: "#6b7280",
-                                                fontSize: "14px",
-                                                lineHeight: 1.6,
-                                            }}
-                                        >
-                                            {blog.desc}
-                                        </p>
-
-                                        <a
-                                            href={blog.href}
-                                            style={{
-                                                color: "#ff550d",
-                                                fontWeight: 800,
-                                                textDecoration: "none",
-                                                fontSize: "14px",
-                                            }}
-                                        >
-                                            Read More →
-                                        </a>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div
-                        style={{
-                            padding: "28px",
-                            borderRadius: "18px",
-                            background: "#111827",
-                            color: "#ffffff",
-                        }}
-                    >
-                        <h2
-                            style={{
-                                margin: "0 0 16px",
-                                fontSize: "24px",
-                                fontWeight: 800,
-                            }}
-                        >
-                            Why use KhanPDF?
-                        </h2>
-
-                        <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                                gap: "14px",
-                            }}
-                        >
-                            {[
-                                "No signup required",
-                                "Fast PDF conversion",
-                                "Works with public URLs",
-                                "Clean PDF output",
-                                "Simple download and sharing",
-                            ].map((item) => (
-                                <div
-                                    key={item}
-                                    style={{
-                                        padding: "14px",
-                                        borderRadius: "14px",
-                                        background: "rgba(255,255,255,0.08)",
-                                        border: "1px solid rgba(255,255,255,0.12)",
-                                        fontWeight: 700,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "8px",
-                                    }}
-                                >
-                                    <CheckCircle2 size={17} color="#22c55e" />
-                                    {item}
+                                        {t.status}
+                                    </span>
                                 </div>
-                            ))}
-                        </div>
+                            );
+                            return available && t.to ? (
+                                <Link key={t.name} href={t.to}>
+                                    {inner}
+                                </Link>
+                            ) : (
+                                <div key={t.name}>{inner}</div>
+                            );
+                        })}
                     </div>
+                </section>
 
-                    <footer
-                        style={{
-                            paddingTop: "8px",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: "14px",
-                            flexWrap: "wrap",
-                            color: "#6b7280",
-                            fontSize: "14px",
-                        }}
-                    >
-                        <p style={{ margin: 0 }}>
-                            © KhanPDF. Convert URLs into PDFs online.
-                        </p>
-
-                        <div style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
-                            <a href="/" style={{ color: "#6b7280", textDecoration: "none" }}>
-                                URL to PDF
-                            </a>
-                            <a
+                {/* Latest blog */}
+                <section className="mt-10">
+                    <h2 className="font-display font-bold text-xl md:text-2xl mb-4">
+                        Latest from the blog
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[
+                            {
+                                t: "How to Convert a Webpage to PDF Online",
+                                img: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=70&auto=format",
+                            },
+                            {
+                                t: "Best Way to Save Articles as PDF",
+                                img: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&q=70&auto=format",
+                            },
+                            {
+                                t: "How to Download a Website Page as PDF",
+                                img: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=70&auto=format",
+                            },
+                        ].map((b) => (
+                            <Link
+                                key={b.t}
                                 href="/blog"
-                                style={{ color: "#6b7280", textDecoration: "none" }}
+                                className="rounded-xl border border-border bg-card overflow-hidden hover:border-foreground/30 transition-colors"
                             >
-                                Blog
-                            </a>
-                            <a href="/" style={{ color: "#6b7280", textDecoration: "none" }}>
-                                Convert PDF
-                            </a>
+                                <div className="aspect-[16/9] bg-muted overflow-hidden">
+                                    <img
+                                        src={b.img}
+                                        alt={b.t}
+                                        loading="lazy"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="p-4">
+                                    <p className="font-semibold leading-snug">{b.t}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Trust */}
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-10 mb-6">
+                    {[
+                        { icon: ShieldCheck, label: "No signup required" },
+                        { icon: Zap, label: "Fast PDF conversion" },
+                        { icon: Globe, label: "Works with public URLs" },
+                        { icon: FileText, label: "Clean PDF output" },
+                        { icon: Share2, label: "Simple download & sharing" },
+                    ].map(({ icon: Icon, label }) => (
+                        <div
+                            key={label}
+                            className="group rounded-2xl border p-4 shadow-sm transition-all duration-300 hover:-translate-y-1"
+                            style={{
+                                background: "#111827",
+                                borderColor: "rgba(255,255,255,0.12)",
+                                boxShadow: "0 12px 30px -22px rgba(0,0,0,0.65)",
+                            }}
+                        >
+                            <div className="flex flex-col items-center text-center gap-3">
+                                <div
+                                    className="flex h-11 w-11 items-center justify-center rounded-xl"
+                                    style={{
+                                        background: `${BRAND}22`,
+                                        color: BRAND,
+                                        border: `1px solid ${BRAND}35`,
+                                    }}
+                                >
+                                    <Icon className="h-5 w-12" />
+                                </div>
+
+                                <span className="text-sm font-semibold leading-snug text-white">
+                                    {label}
+                                </span>
+                            </div>
                         </div>
-                    </footer>
-                </div>
-            </section>
-        </main>
+                    ))}
+                </section>
+
+                {/* Footer */}
+
+            </main>
+        </div>
     );
 }
+
