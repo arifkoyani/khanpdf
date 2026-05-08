@@ -39,9 +39,10 @@ export default function UrlToPdf() {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const pollRef = useRef<number | null>(null);
 
-  // Email send (UI only — no API call)
+  // Email send
   const [emailValue, setEmailValue] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
 
   // PDF settings — sent to API on convert
   const [marginTop, setMarginTop] = useState("10mm");
@@ -199,6 +200,7 @@ export default function UrlToPdf() {
 
     try {
       setError(null);
+      setEmailSending(true);
 
       const res = await fetch("/api/sendemail", {
         method: "POST",
@@ -211,7 +213,6 @@ export default function UrlToPdf() {
         })
 
       });
-      setEmailValue("")
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -223,6 +224,8 @@ export default function UrlToPdf() {
     } catch (e: unknown) {
       setEmailSent(false);
       setError(e instanceof Error ? e.message : "Failed to send email.");
+    } finally {
+      setEmailSending(false);
     }
   };
   const busy = status === "submitting" || status === "processing";
@@ -499,9 +502,8 @@ export default function UrlToPdf() {
                         flex: "0 0 80%",
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
                         fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
-                        background: "#f16625",
-                        border: "0.5px solid rgba(255,255,255,0.85)",
-                        // boxShadow: "0 5px 15px -20px #ff7524",
+                        background: "#ff550d",
+                        boxShadow: "0 10px 30px -10px #ff550d",
                       }}
                     >
                       <Download style={{ height: "1.05rem", width: "1.05rem" }} />
@@ -515,51 +517,59 @@ export default function UrlToPdf() {
                       style={{
                         flex: "0 0 calc(20% - 0.6rem)",
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
-                        background: "#f16625",
-
-                        boxShadow: "0 10px 30px -10px #ff7524",
+                        background: "#ff550d",
+                        boxShadow: "0 10px 30px -10px #ff550d",
                       }}
                     >
                       <ExternalLink style={{ height: "1rem", width: "1rem" }} />
                     </button>
                   </div>
 
-                  {/* Email row — same proportions (UI only) */}
-                  <div className="w-full flex" style={{ gap: "0.6rem", marginTop: "0.4vh" }}>
-                    <input
-                      type="email"
-                      placeholder="you@example.com"
-                      value={emailValue}
-                      onChange={(e) => { setEmailValue(e.target.value); setEmailSent(false); }}
-                      className="bg-background/60 border border-border rounded-xl outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
-                      style={{
-                        flex: "0 0 80%",
-                        height: "clamp(3rem, 6.5vh, 3.5rem)",
-                        paddingLeft: "1rem",
-                        paddingRight: "1rem",
-                        fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSendEmail}
-                      title="Send to email"
-                      className="rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center"
-                      style={{
-                        flex: "0 0 calc(20% - 0.6rem)",
-                        height: "clamp(3rem, 6.5vh, 3.5rem)",
-                        background: "#ff7524",
-                        border: "1px solid rgba(255,255,255,0.85)",
-                        boxShadow: "0 10px 30px -10px #ff7524",
-                        fontSize: "clamp(0.85rem, 1.3vw, 0.95rem)",
-                      }}
-                    >
-                      {emailSent ? (
-                        <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3 }} />
-                      ) : (
-                        "Send"
-                      )}
-                    </button>
+                  {/* Email row */}
+                  <div className="w-full flex flex-col" style={{ gap: "0.5vh", marginTop: "0.4vh" }}>
+                    <div className="w-full flex" style={{ gap: "0.6rem" }}>
+                      <input
+                        type="email"
+                        placeholder="you@example.com"
+                        value={emailValue}
+                        onChange={(e) => { setEmailValue(e.target.value); setEmailSent(false); }}
+                        className="bg-background/60 border border-border rounded-xl outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                        style={{
+                          flex: "0 0 80%",
+                          height: "clamp(3rem, 6.5vh, 3.5rem)",
+                          paddingLeft: "1rem",
+                          paddingRight: "1rem",
+                          fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSendEmail}
+                        disabled={emailSending}
+                        title="Send to email"
+                        className="rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70"
+                        style={{
+                          flex: "0 0 calc(20% - 0.6rem)",
+                          height: "clamp(3rem, 6.5vh, 3.5rem)",
+                          background: "#ff550d",
+                          boxShadow: "0 10px 30px -10px #ff550d",
+                          fontSize: "clamp(0.85rem, 1.3vw, 0.95rem)",
+                        }}
+                      >
+                        {emailSending ? (
+                          <Spinner />
+                        ) : emailSent ? (
+                          <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3 }} />
+                        ) : (
+                          "Send"
+                        )}
+                      </button>
+                    </div>
+                    {emailSent && (
+                      <p style={{ fontSize: "clamp(0.75rem, 1.1vw, 0.82rem)", color: "#22c55e", paddingLeft: "0.25rem" }}>
+                        Message sent successfully
+                      </p>
+                    )}
                   </div>
 
                   <button
