@@ -412,7 +412,7 @@ export default function UrlToPdf() {
                               key={o}
                               type="button"
                               onClick={() => setOrientation(o)}
-                              className={`rounded-lg border transition-all inline-flex items-center justify-center gap-2 ${active
+                              className={`cursor-pointer rounded-lg border transition-all inline-flex items-center justify-center gap-2 ${active
                                 ? "border-[oklch(0.62_0.18_250)] bg-[oklch(0.62_0.18_250/0.1)] text-foreground"
                                 : "border-border bg-background/40 text-muted-foreground hover:text-foreground"
                                 }`}
@@ -453,7 +453,7 @@ export default function UrlToPdf() {
                     type="button"
                     onClick={handleConvert}
                     disabled={!valid}
-                    className="w-full rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
+                    className="w-full cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
                     style={{
                       height: "clamp(3rem, 7vh, 3.5rem)",
                       fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
@@ -504,7 +504,7 @@ export default function UrlToPdf() {
                     <button
                       type="button"
                       onClick={handleDownload}
-                      className="rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center gap-2"
+                      className=" cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center gap-2"
                       style={{
                         flex: "0 0 80%",
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
@@ -520,7 +520,7 @@ export default function UrlToPdf() {
                       type="button"
                       onClick={handleOpen}
                       title="Open PDF"
-                      className="rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center"
+                      className="cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center"
                       style={{
                         flex: "0 0 calc(20% - 0.6rem)",
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
@@ -554,7 +554,7 @@ export default function UrlToPdf() {
                         onClick={handleSendEmail}
                         disabled={emailSending}
                         title="Send to email"
-                        className="rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
                         style={{
                           flex: "0 0 calc(20% - 0.6rem)",
                           height: "clamp(3rem, 6.5vh, 3.5rem)",
@@ -564,9 +564,9 @@ export default function UrlToPdf() {
                         }}
                       >
                         {emailSending ? (
-                          <span className="animate-pulse" style={{ color: "oklch(0.7 0.18 145)" }}>Sending...</span>
+                          <span className="animate-pulse" >Sending...</span>
                         ) : emailSent ? (
-                          <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3, color: "oklch(0.7 0.18 145)" }} />
+                          <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3, }} />
                         ) : (
                           "Send"
                         )}
@@ -582,7 +582,7 @@ export default function UrlToPdf() {
                   <button
                     type="button"
                     onClick={reset}
-                    className="w-full rounded-xl text-muted-foreground hover:text-foreground transition-colors inline-flex items-center justify-center gap-2"
+                    className="cursor-pointer w-full rounded-xl text-muted-foreground hover:text-foreground transition-colors inline-flex items-center justify-center gap-2"
                     style={{
                       height: "clamp(2.5rem, 5.5vh, 3rem)",
                       fontSize: "clamp(0.85rem, 1.3vw, 0.95rem)",
