@@ -190,7 +190,7 @@ export default function OpenPdfViewer() {
     return (
         <div className="min-h-screen bg-background text-foreground">
 
-            <main className="mx-auto max-w-7xl px-5 py-8 md:py-12 space-y-10 mt-8">
+            <main className="mx-auto max-w-10xl px-5 py-8 md:py-12 space-y-10 mt-8">
                 {/* Top row: title + actions */}
                 <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
