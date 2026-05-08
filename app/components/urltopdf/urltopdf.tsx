@@ -571,7 +571,7 @@ export default function UrlToPdf() {
                         ) : emailSent ? (
                           <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3, color: "oklch(0.7 0.18 145)" }} />
                         ) : (
-                          "Send"
+                          <span style={{ color: "oklch(0.7 0.18 145)" }}>Send</span>
                         )}
                       </button>
                     </div>
