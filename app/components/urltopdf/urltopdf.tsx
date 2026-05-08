@@ -184,8 +184,18 @@ export default function UrlToPdf() {
   };
 
   const handleOpen = () => {
-    if (!fileUrl) return;
-    window.open(fileUrl, "_blank", "noopener,noreferrer");
+    console.log("PDF URL:", fileUrl);
+
+    if (!fileUrl) {
+      alert("PDF is not ready yet");
+      return;
+    }
+
+    const newTab = window.open(fileUrl, "_blank");
+
+    if (!newTab) {
+      alert("Popup blocked. Please allow popups for this site.");
+    }
   };
   const handleSendEmail = async () => {
     if (!fileUrl) {
@@ -503,7 +513,7 @@ export default function UrlToPdf() {
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
                         fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
                         background: "#ff550d",
-                        boxShadow: "0 10px 30px -10px #ff550d",
+                        boxShadow: "0 10px 30px -15px #ff550d",
                       }}
                     >
                       <Download style={{ height: "1.05rem", width: "1.05rem" }} />
@@ -547,7 +557,7 @@ export default function UrlToPdf() {
                         onClick={handleSendEmail}
                         disabled={emailSending}
                         title="Send to email"
-                        className="rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70"
+                        className="rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
                         style={{
                           flex: "0 0 calc(20% - 0.6rem)",
                           height: "clamp(3rem, 6.5vh, 3.5rem)",
@@ -557,9 +567,9 @@ export default function UrlToPdf() {
                         }}
                       >
                         {emailSending ? (
-                          <Spinner />
+                          <span className="animate-pulse" style={{ color: "oklch(0.7 0.18 145)" }}>Sending...</span>
                         ) : emailSent ? (
-                          <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3 }} />
+                          <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3, color: "oklch(0.7 0.18 145)" }} />
                         ) : (
                           "Send"
                         )}
