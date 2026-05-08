@@ -37,6 +37,7 @@ export default function UrlToPdf() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
   const pollRef = useRef<number | null>(null);
 
   // Email send
@@ -73,6 +74,7 @@ export default function UrlToPdf() {
     setStatus("idle");
     setError(null);
     setFileUrl(null);
+    setRequestId(null);
     setMarginTop("10mm");
     setMarginRight("5mm");
     setMarginBottom("15mm");
@@ -147,10 +149,12 @@ export default function UrlToPdf() {
         throw new Error("Request ID not found");
       }
 
+      setRequestId(item.requestId);
       setStatus("processing");
 
       // backend gives requestId, frontend uses it to fetch final result
       pollStatus(item.requestId);
+
     } catch (e: unknown) {
       stopTimers();
       setStatus("error");
@@ -184,16 +188,18 @@ export default function UrlToPdf() {
   };
 
   const handleOpen = () => {
-    if (!fileUrl) return;
+    if (!requestId) return;
 
-    const newTab = window.open(fileUrl, "_blank");
+    const viewerUrl = `/open-pdf?requestId=${encodeURIComponent(requestId)}`;
+
+    const newTab = window.open(viewerUrl, "_blank");
 
     if (newTab) {
       newTab.opener = null;
     } else {
-      window.location.href = fileUrl;
+      window.location.href = viewerUrl;
     }
-  };;
+  };
   const handleSendEmail = async () => {
     if (!fileUrl) {
       setError("PDF URL not found.");
@@ -519,13 +525,14 @@ export default function UrlToPdf() {
                     <button
                       type="button"
                       onClick={handleOpen}
+                      disabled={!requestId}
                       title="Open PDF"
-                      className="cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center"
+                      className="cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
                         flex: "0 0 calc(20% - 0.6rem)",
                         height: "clamp(3rem, 6.5vh, 3.5rem)",
                         background: "#ff550d",
-                        boxShadow: "0 10px 30px -10px #ff550d",
+                        boxShadow: "0 10px 30px -15px #ff550d",
                       }}
                     >
                       <ExternalLink style={{ height: "1rem", width: "1rem" }} />
