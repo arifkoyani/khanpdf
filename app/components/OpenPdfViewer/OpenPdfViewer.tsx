@@ -443,41 +443,31 @@ export default function OpenPdfViewer() {
 
                 {/* Trust */}
                 <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-10 mb-6">
-                    {[
-                        { icon: ShieldCheck, label: "No signup required" },
-                        { icon: Zap, label: "Fast PDF conversion" },
-                        { icon: Globe, label: "Works with public URLs" },
-                        { icon: FileText, label: "Clean PDF output" },
-                        { icon: Share2, label: "Simple download & sharing" },
-                    ].map(({ icon: Icon, label }) => (
-                        <div
-                            key={label}
-                            className="group rounded-2xl border p-4 shadow-sm transition-all duration-300 hover:-translate-y-1"
-                            style={{
-                                background: "#111827",
-                                borderColor: "rgba(255,255,255,0.12)",
-                                boxShadow: "0 12px 30px -22px rgba(0,0,0,0.65)",
-                            }}
-                        >
-                            <div className="flex flex-col items-center text-center gap-3">
-                                <div
-                                    className="flex h-11 w-11 items-center justify-center rounded-xl"
-                                    style={{
-                                        background: `${BRAND}22`,
-                                        color: BRAND,
-                                        border: `1px solid ${BRAND}35`,
-                                    }}
-                                >
-                                    <Icon className="h-5 w-12" />
-                                </div>
+  {[
+    { icon: ShieldCheck, label: "No signup required" },
+    { icon: Zap, label: "Fast PDF conversion" },
+    { icon: Globe, label: "Works with public URLs" },
+    { icon: FileText, label: "Clean PDF output" },
+    { icon: Share2, label: "Simple download & sharing" },
+  ].map(({ icon: Icon, label }) => (
+    <div
+      key={label}
+      className="group rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card"
+    >
+      <div className="flex flex-col items-center text-center gap-3">
+        <div
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary"
+        >
+          <Icon className="h-5 w-12" />
+        </div>
 
-                                <span className="text-sm font-semibold leading-snug text-white">
-                                    {label}
-                                </span>
-                            </div>
-                        </div>
-                    ))}
-                </section>
+        <span className="text-sm font-semibold leading-snug text-foreground">
+          {label}
+        </span>
+      </div>
+    </div>
+  ))}
+</section>
 
                 {/* Footer */}
 

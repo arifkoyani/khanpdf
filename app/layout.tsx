@@ -4,6 +4,7 @@ import "./globals.css";
 
 import Navbar from "./components/navbar/navbar";
 import Footer from "./components/footer/footer";
+import { Providers } from "./providers/providers";
 
 
 
@@ -19,7 +20,6 @@ export const metadata: Metadata = {
   //   google: "eK_YuDSi4L54xHu5OXX27M_wHP8J87FF2QuJUb5UjQ8",
   // }
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,12 +28,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar />
-        <div className="flex-1">{children}</div>
-        <Footer />
+        <Providers>
+          <Navbar />
+
+          <div className="flex-1">
+            {children}
+          </div>
+
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

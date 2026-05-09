@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-
+import { ThemeToggle } from "../../components/theme-toggle/theme-toggle";
 
 const navItems = [
   { to: "/", label: "Home" },
@@ -19,17 +19,14 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/60">
       <div className="mx-auto max-w-5xl px-5 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-
-
           <span className="font-display flex justify-center items-end font-bold text-sm tracking-tight gap-1">
             <Image
               src="/logo.png"
               alt="KhanPDF Logo"
               width={20}
               height={20}
-              
-              
-            />  <span className="text-white">KhanPDF</span>
+            />
+            <span className="text-foreground">KhanPDF</span>
           </span>
         </Link>
 
@@ -41,8 +38,9 @@ export default function Navbar() {
               <Link
                 key={item.to}
                 href={item.to}
-                className={`hover:text-foreground transition-colors ${isActive ? "text-foreground" : ""
-                  }`}
+                className={`hover:text-foreground transition-colors ${
+                  isActive ? "text-foreground" : ""
+                }`}
               >
                 {item.label}
               </Link>
@@ -50,7 +48,9 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="w-7" aria-hidden />
+        <div className="flex items-center justify-end">
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

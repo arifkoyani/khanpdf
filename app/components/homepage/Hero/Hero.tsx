@@ -24,11 +24,11 @@ export function Hero() {
           </Button>
 
           <Button
-            asChild
-            className="h-11 px-8 rounded-lg border border-foreground/15 bg-[#f7f9fa] hover:bg-foreground hover:text-background"
-          >
-            <a href="#how">See how it works</a>
-          </Button>
+  asChild
+  className="h-11 px-8 rounded-lg border border-border bg-card text-foreground hover:bg-foreground hover:text-background"
+>
+  <a href="#how">See how it works</a>
+</Button>
         </div>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary" /> 100% Free</span>

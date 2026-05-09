@@ -20,8 +20,8 @@ export function WhyUseThis() {
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((it) => (
             <div key={it.title} className="group rounded-xl border border-border bg-card p-5 hover:border-primary/50 hover:shadow-glow transition-all duration-300">
-              <div className="h-9 w-9 rounded-lg bg-secondary text-foreground grid place-items-center group-hover:bg-gradient-primary transition-colors">
-                <it.icon className="h-4 w-4" />
+              <div className="h-9 w-9 rounded-lg  text-foreground bg-primary/15 grid place-items-center group-hover:bg-gradient-primary transition-colors">
+                <it.icon className="h-4 w-4 text-primary" />
               </div>
               <h3 className="mt-4 font-display text-sm font-bold">{it.title}</h3>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{it.desc}</p>
