@@ -219,7 +219,7 @@ export default function UrlToPdf() {
   const handleOpen = () => {
     if (!requestId) return;
 
-    const viewerUrl = `/open-pdf?requestId=${encodeURIComponent(requestId)}`;
+    const viewerUrl = `/url-to-pdf/open-pdf?requestId=${encodeURIComponent(requestId)}`;
 
     const newTab = window.open(viewerUrl, "_blank");
 
