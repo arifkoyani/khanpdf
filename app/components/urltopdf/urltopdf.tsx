@@ -67,6 +67,7 @@ export default function UrlToPdf() {
   const [error, setError] = useState<string | null>(null);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
   const pollRef = useRef<number | null>(null);
 
   // Email send
@@ -272,6 +273,29 @@ export default function UrlToPdf() {
   };
   const busy = status === "submitting" || status === "processing";
   const showInput = status === "idle" || status === "error";
+
+  useEffect(() => {
+    if (status === "submitting" || status === "processing") {
+      setProgress(5);
+  
+      const timer = window.setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 95) return prev;
+          return prev + Math.floor(Math.random() * 6) + 1;
+        });
+      }, 700);
+  
+      return () => window.clearInterval(timer);
+    }
+  
+    if (status === "done") {
+      setProgress(100);
+    }
+  
+    if (status === "idle" || status === "error") {
+      setProgress(0);
+    }
+  }, [status]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -514,12 +538,20 @@ export default function UrlToPdf() {
 
             {/* PROCESSING */}
             {busy && (
-              <div className="relative flex flex-col items-center justify-center w-full h-full" style={{ gap: "3vh", minHeight: "clamp(16rem, 32vh, 20rem)" }}>
-                <Spinner />
-                <p className="text-foreground/90 text-center font-medium" style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)" }}>
-                  Converting your URL into PDF...
-                </p>
-              </div>
+         <div
+         className="relative flex flex-col items-center justify-center w-full h-full"
+         style={{ gap: "3vh", minHeight: "clamp(16rem, 32vh, 20rem)" }}
+       >
+         <Spinner />
+       
+         <p
+           className="text-foreground/90 text-center font-medium"
+           style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)" }}
+         >
+           Converting your URL into PDF....{progress}%
+         </p>
+     
+       </div>
             )}
 
             {/* DONE */}
