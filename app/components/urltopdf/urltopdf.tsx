@@ -273,17 +273,16 @@ export default function UrlToPdf() {
   };
   const busy = status === "submitting" || status === "processing";
   const showInput = status === "idle" || status === "error";
-
   useEffect(() => {
     if (status === "submitting" || status === "processing") {
-      setProgress(5);
+      setProgress(1);
   
       const timer = window.setInterval(() => {
         setProgress((prev) => {
-          if (prev >= 95) return prev;
-          return prev + Math.floor(Math.random() * 6) + 1;
+          if (prev >= 95) return 95;
+          return prev + 1;
         });
-      }, 700);
+      }, 100);
   
       return () => window.clearInterval(timer);
     }
