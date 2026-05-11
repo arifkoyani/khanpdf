@@ -279,10 +279,10 @@ export default function UrlToPdf() {
   
       const timer = window.setInterval(() => {
         setProgress((prev) => {
-          if (prev >= 95) return 95;
+          if (prev >= 100) return 100;
           return prev + 1;
         });
-      }, 100);
+      }, 150);
   
       return () => window.clearInterval(timer);
     }
