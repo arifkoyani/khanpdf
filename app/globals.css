@@ -231,4 +231,68 @@
     100% { background-position: 200% 0; }
   }
   .animate-float { animation: float-up 6s ease-in-out infinite; }
+
+
+  /* url to pdf input csss */
+
+  @property --url-border-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
   
+  .url-input-3d-wrap {
+    width: 55vw;
+    min-width: 320px;
+    max-width: 620px;
+    position: relative;
+    border-radius: 1rem;
+    padding: 2px;
+    background:
+      conic-gradient(
+        from var(--url-border-angle),
+        transparent 0deg,
+        transparent 70deg,
+        #ff560d93 120deg,
+        #c8680175 170deg,
+        transparent 240deg,
+        transparent 360deg
+      );
+    animation: url-input-border-spin 3s linear infinite;
+    box-shadow:
+      0 20px 45px -25px rgba(255, 85, 13, 0.65),
+      0 18px 40px -30px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .light .url-input-3d-wrap {
+    box-shadow:
+      0 18px 40px -24px rgba(255, 85, 13, 0.45),
+      0 18px 42px -34px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+  
+  .url-input-3d {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -10px 24px rgba(0, 0, 0, 0.18);
+  }
+  
+  .light .url-input-3d {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -10px 24px rgba(0, 0, 0, 0.04);
+  }
+  
+  @keyframes url-input-border-spin {
+    to {
+      --url-border-angle: 360deg;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .url-input-3d-wrap {
+      width: 92vw;
+      min-width: 0;
+    }
+  }

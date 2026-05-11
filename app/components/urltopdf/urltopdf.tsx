@@ -24,9 +24,38 @@ const PAPER_SIZES = [
 function isValidUrl(value: string) {
   const v = value.trim();
   if (!v) return false;
+
   try {
     const u = new URL(v);
-    return u.protocol === "http:" || u.protocol === "https:";
+
+    if (u.protocol !== "http:" && u.protocol !== "https:") {
+      return false;
+    }
+
+    const host = u.hostname.toLowerCase();
+
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "0.0.0.0" ||
+      host === "::1"
+    ) {
+      return false;
+    }
+
+    if (
+      host.startsWith("10.") ||
+      host.startsWith("192.168.") ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)
+    ) {
+      return false;
+    }
+
+    if (host.endsWith(".local")) {
+      return false;
+    }
+
+    return true;
   } catch {
     return false;
   }
@@ -272,7 +301,7 @@ export default function UrlToPdf() {
           <div
             className="relative w-full overflow-hidden"
             style={{
-              maxWidth: "min(92vw, 560px)",
+              maxWidth: "min(92vw, 1290px)",
               padding: "clamp(1.25rem, 3vw, 2rem)",
               minHeight: "clamp(18rem, 38vh, 24rem)",
               marginTop: "4rem"
@@ -285,54 +314,64 @@ export default function UrlToPdf() {
                   Enter a public website URL and convert it into a PDF file.
                 </p>
 
-                <div className="w-full">
-                  <div className="relative w-full">
-                    <Link2
-                      className="absolute left-[1.25rem] top-1/2 -translate-y-1/2 text-muted-foreground"
-                      style={{ height: "clamp(1rem, 1.6vw, 1.15rem)", width: "clamp(1rem, 1.6vw, 1.15rem)" }}
-                    />
-                    <input
-                      type="url"
-                      inputMode="url"
-                      autoFocus
-                      placeholder="https://example.com"
-                      value={url}
-                      onChange={(e) => {
-                        setUrl(e.target.value);
-                        if (error) setError(null);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && valid) handleConvert();
-                      }}
-                      className="w-full bg-background/60 border border-border rounded-xl outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
-                      style={{
-                        height: "clamp(3rem, 7vh, 3.75rem)",
-                        paddingLeft: "clamp(2.75rem, 5vw, 3.25rem)",
-                        paddingRight: "clamp(2.75rem, 5vw, 3.25rem)",
-                        fontSize: "clamp(0.95rem, 1.6vw, 1.05rem)",
-                      }}
-                    />
-                    {/* Animated validation tick */}
-                    <div
-                      className={`absolute right-[1rem] top-1/2 -translate-y-1/2 grid place-items-center rounded-full bg-[oklch(0.62_0.18_250)] text-white transition-all duration-300 ${valid ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                        }`}
-                      style={{
-                        height: "clamp(1.5rem, 2.6vw, 1.85rem)",
-                        width: "clamp(1.5rem, 2.6vw, 1.85rem)",
-                        background: "oklch(0.7 0.18 145)",
-                        boxShadow: valid ? "0 0 0 4px oklch(0.7 0.18 145 / 0.22)" : "none",
-                      }}
-                    >
-                      <Check
-                        className="animate-[scale-in_0.35s_ease-out]"
-                        style={{ height: "clamp(0.85rem, 1.4vw, 1rem)", width: "clamp(0.85rem, 1.4vw, 1rem)", strokeWidth: 3 }}
-                      />
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground" style={{ marginTop: "1.2vh", fontSize: "clamp(0.7rem, 1.1vw, 0.78rem)" }}>
-                    Only public URLs are supported.
-                  </p>
-                </div>
+                <div className="w-full flex justify-center">
+  <div className="url-input-3d-wrap">
+    <div className="relative w-full rounded-xl bg-background">
+      <Link2
+        className="absolute left-[1.25rem] top-1/2 z-20 -translate-y-1/2 text-muted-foreground"
+        style={{
+          height: "clamp(1rem, 1.6vw, 1.15rem)",
+          width: "clamp(1rem, 1.6vw, 1.15rem)",
+        }}
+      />
+
+      <input
+        type="url"
+        inputMode="url"
+        autoFocus
+        placeholder="https://example.com"
+        value={url}
+        onChange={(e) => {
+          setUrl(e.target.value);
+          if (error) setError(null);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && valid) handleConvert();
+        }}
+        className="url-input-3d relative z-10 w-full bg-card text-foreground border border-transparent rounded-xl outline-none transition-all focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+        style={{
+          height: "clamp(3rem, 7vh, 3.75rem)",
+          paddingLeft: "clamp(2.75rem, 5vw, 3.25rem)",
+          paddingRight: "clamp(2.75rem, 5vw, 3.25rem)",
+          fontSize: "clamp(0.95rem, 1.6vw, 1.05rem)",
+        }}
+      />
+
+      <div
+        className={`absolute right-[1rem] top-1/2 z-20 -translate-y-1/2 grid place-items-center rounded-full text-white transition-all duration-300 ${
+          valid ? "opacity-100 scale-100" : "opacity-0 scale-50"
+        }`}
+        style={{
+          height: "clamp(1.5rem, 2.6vw, 1.85rem)",
+          width: "clamp(1.5rem, 2.6vw, 1.85rem)",
+          background: "oklch(0.7 0.18 145)",
+          boxShadow: valid
+            ? "0 0 0 4px oklch(0.7 0.18 145 / 0.22)"
+            : "none",
+        }}
+      >
+        <Check
+          className="animate-[scale-in_0.35s_ease-out]"
+          style={{
+            height: "clamp(0.85rem, 1.4vw, 1rem)",
+            width: "clamp(0.85rem, 1.4vw, 1rem)",
+            strokeWidth: 3,
+          }}
+        />
+      </div>
+    </div>
+  </div>
+</div>
 
                 {/* PDF Settings — appears once URL is valid */}
                 <div
