@@ -273,16 +273,17 @@ export default function UrlToPdf() {
   };
   const busy = status === "submitting" || status === "processing";
   const showInput = status === "idle" || status === "error";
+
   useEffect(() => {
     if (status === "submitting" || status === "processing") {
-      setProgress(1);
+      setProgress((prev) => (prev > 0 ? prev : 1));
   
       const timer = window.setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) return 100;
           return prev + 1;
         });
-      }, 110);
+      }, 100);
   
       return () => window.clearInterval(timer);
     }
@@ -544,11 +545,17 @@ export default function UrlToPdf() {
          <Spinner />
        
          <p
-           className="text-foreground/90 text-center font-medium"
-           style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)" }}
-         >
-           Converting your URL into PDF....{progress}%
-         </p>
+  className="text-foreground/90 text-center font-medium"
+  style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)" }}
+>
+  Converting your URL into PDF...
+  <span
+    className="inline-block text-left font-mono tabular-nums"
+    style={{ width: "4ch", marginLeft: "0.35rem" }}
+  >
+    {progress}%
+  </span>
+</p>
      
        </div>
             )}
