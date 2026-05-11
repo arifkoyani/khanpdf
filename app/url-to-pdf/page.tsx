@@ -29,7 +29,7 @@ const webApplicationSchema = {
   browserRequirements: "Requires JavaScript",
   isAccessibleForFree: true,
   description:
-    "KhanPDF is a free online URL to PDF converter that converts publicly accessible webpages, articles, blogs, documentation pages, reports, public file links, images, HTML pages, JSON files, text files, and common public URLs into downloadable PDF files.",
+    "KhanPDF is a free online URL to PDF converter that converts publicly accessible webpages, articles, blogs, documentation pages, reports, public file links, images, HTML pages, github repos,JSON files, text files, and common public URLs into downloadable PDF files.",
   offers: {
     "@type": "Offer",
     price: "0",

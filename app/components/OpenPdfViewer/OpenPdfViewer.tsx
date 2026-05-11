@@ -469,7 +469,6 @@ export default function OpenPdfViewer() {
   ))}
 </section>
 
-                {/* Footer */}
 
             </main>
         </div>
