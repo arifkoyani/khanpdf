@@ -282,7 +282,7 @@ export default function UrlToPdf() {
           if (prev >= 100) return 100;
           return prev + 1;
         });
-      }, 150);
+      }, 110);
   
       return () => window.clearInterval(timer);
     }
