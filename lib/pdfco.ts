@@ -5,9 +5,9 @@ interface PdfCoResponse {
   name?: string;
   message?: string;
   pageCount?: number;
-  creditsUsed?: number;
-  durationMs?: number;
-  expiresAt?: string;
+  credits?: number;
+  duration?: number;
+  outputLinkValidTill?: string;
 }
 
 /** Optional PDF rendering settings forwarded from the frontend. */
@@ -75,15 +75,15 @@ export async function submitPdfJob(
     throw new Error("khanpdf returned no URL in response");
   }
 
-  // Calculate link expiration (default 24 hours from now)
-  const outputLinkValidTill = data.expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  // Use API's outputLinkValidTill or default to 24 hours
+  const outputLinkValidTill = data.outputLinkValidTill || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
   return {
     fileUrl: data.url,
     fileName: data.name || "www.khanpdf.com.pdf",
     pageCount: data.pageCount || 1,
-    creditsUsed: data.creditsUsed || 9,
-    durationMs: data.durationMs || durationMs,
+    creditsUsed: data.credits || 9,
+    durationMs: data.duration || durationMs,
     outputLinkValidTill,
   };
 }
