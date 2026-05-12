@@ -83,9 +83,9 @@ export default function OpenPdfViewer() {
                 const item = Array.isArray(json) ? json[0] : json;
                 const s = item?.status;
                 failures = 0;
-                if (s === "done" && item?.fileUrl) {
+                if (s === "done" && (item?.data?.fileUrl || item?.fileUrl)) {
                     if (!cancelled) {
-                        setFileUrl(item.fileUrl as string);
+                        setFileUrl((item?.data?.fileUrl || item?.fileUrl) as string);
                         setStatus("done");
                         setExpiresAt(new Date(Date.now() + ONE_HOUR_MS));
                     }
