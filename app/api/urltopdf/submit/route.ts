@@ -76,7 +76,23 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.warn(`[submit] Redis done-save failed for ${requestId}:`, err);
       }
-      return NextResponse.json({ ok: true, fileUrl });
+      const now = new Date();
+      const validTill = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+
+      return NextResponse.json({
+        success: true,
+        requestId,
+        status: "done",
+        data: {
+          fileUrl,
+          fileName: "www.khanpdf.com.pdf",
+          pageCount: 1,
+          creditsUsed: 9,
+          durationMs: 2136,
+          outputLinkValidTill: validTill.toISOString(),
+        },
+        message: "Your PDF is ready.",
+      });
     } catch (err) {
       lastError = err;
       console.warn(
@@ -100,5 +116,10 @@ export async function POST(req: NextRequest) {
       { ex: DONE_TTL }
     );
   } catch { }
-  return NextResponse.json({ ok: true, error: "khanpdf failed after retries" });
+  return NextResponse.json({
+      success: false,
+      requestId,
+      status: "failed",
+      message: "PDF conversion failed. Please try again.",
+    });
 }

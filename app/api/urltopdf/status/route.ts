@@ -9,7 +9,10 @@ export async function GET(req: NextRequest) {
   const requestId = searchParams.get("requestId");
 
   if (!requestId) {
-    return NextResponse.json({ error: "requestId is required" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, requestId: "", status: "error", message: "requestId is required" },
+      { status: 400 }
+    );
   }
 
   let job: JobData | null;
@@ -17,22 +20,51 @@ export async function GET(req: NextRequest) {
     job = await redis.get<JobData>(`job:${requestId}`);
   } catch (err) {
     console.error("[status] Redis error:", err);
-    return NextResponse.json({ status: "processing" });
+    return NextResponse.json({
+      success: true,
+      requestId,
+      status: "processing",
+      message: "Checking job status...",
+    });
   }
 
   // Distinct status for "key not in Redis" vs "job explicitly failed"
   if (!job) {
-    return NextResponse.json({ status: "not_found" });
+    return NextResponse.json({
+      success: false,
+      requestId,
+      status: "not_found",
+      message: "No conversion job found for this requestId.",
+    });
   }
 
   if (job.status === "done") {
     await redis.expire(`job:${requestId}`, SEEN_DONE_TTL).catch(() => {});
-    return NextResponse.json({ status: "done", fileUrl: job.fileUrl });
+    return NextResponse.json({
+      success: true,
+      requestId,
+      status: "done",
+      data: {
+        fileUrl: job.fileUrl,
+        fileName: "www.khanpdf.com.pdf",
+      },
+      message: "Your PDF is ready.",
+    });
   }
 
   if (job.status === "failed") {
-    return NextResponse.json({ status: "failed" });
+    return NextResponse.json({
+      success: false,
+      requestId,
+      status: "failed",
+      message: "PDF conversion failed. Please try again.",
+    });
   }
 
-  return NextResponse.json({ status: "processing" });
+  return NextResponse.json({
+    success: true,
+    requestId,
+    status: "processing",
+    message: "Your PDF is still being generated.",
+  });
 }

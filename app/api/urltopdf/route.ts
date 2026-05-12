@@ -34,7 +34,8 @@ export async function POST(req: NextRequest) {
       ...(orientation && { orientation }),
     };
 
-    const requestId = generateRequestId();
+    const rawRequestId = generateRequestId();
+    const requestId = `urlpdf_${rawRequestId}`;
     const job: JobData = {
       requestId,
       url,
@@ -67,7 +68,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, requestId, status: "processing" });
+    return NextResponse.json({
+      success: true,
+      requestId,
+      status: "processing",
+      message: "Your PDF is still being generated.",
+    });
   } catch (err) {
     console.error("[urltopdf] intake error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
