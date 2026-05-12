@@ -6,6 +6,7 @@ import {
   } from "../../ui/accordion";
   
   const faqs = [
+    { q: "What is URL to PDF?", a: "URL to PDF is a free online tool that converts any publicly accessible webpage into a PDF document. Simply paste a link, and we'll render the page as a downloadable PDF." },
     { q: "Is URL to PDF really free?", a: "Yes — converting public webpages to PDF is 100% free with no sign-up, watermarks, or hidden fees." },
     { q: "Do I need to create an account?", a: "No account is required. Just paste a URL, click convert, and download your PDF." },
     { q: "What kind of pages can I convert?", a: "Any publicly accessible webpage works best — blog posts, articles, docs, recipes, news, and more." },
