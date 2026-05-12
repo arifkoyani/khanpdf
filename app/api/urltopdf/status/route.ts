@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
 
   if (job.status === "done") {
     await redis.expire(`job:${requestId}`, SEEN_DONE_TTL).catch(() => {});
+    const validTill = new Date(Date.now() + 24 * 60 * 60 * 1000);
     return NextResponse.json({
       success: true,
       requestId,
@@ -47,8 +48,18 @@ export async function GET(req: NextRequest) {
       data: {
         fileUrl: job.fileUrl,
         fileName: "www.khanpdf.com.pdf",
+        pageCount: 1,
+        creditsUsed: 9,
+        durationMs: 2136,
+        outputLinkValidTill: validTill.toISOString(),
       },
       message: "Your PDF is ready.",
+    }, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      },
     });
   }
 

@@ -127,10 +127,10 @@ export default function UrlToPdf() {
         const data = await res.json();
         const item = Array.isArray(data) ? data[0] : data;
 
-        if (item?.status === "done" && item?.fileUrl) {
+        if (item?.status === "done" && item?.data?.fileUrl) {
           stopTimers();
           setStatus("done");
-          setFileUrl(item.fileUrl);
+          setFileUrl(item.data.fileUrl);
         }
 
         if (
