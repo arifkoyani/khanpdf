@@ -66,30 +66,28 @@ export async function POST(req: NextRequest) {
   let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const fileUrl = await submitPdfJob(job.url, job.pdfOptions ?? pdfOptions ?? {});
+      const result = await submitPdfJob(job.url, job.pdfOptions ?? pdfOptions ?? {});
       try {
         await redis.set(
           `job:${requestId}`,
-          { ...job, status: "done", fileUrl },
+          { ...job, status: "done", fileUrl: result.fileUrl, pdfJobResult: result },
           { ex: DONE_TTL }
         );
       } catch (err) {
         console.warn(`[submit] Redis done-save failed for ${requestId}:`, err);
       }
-      const now = new Date();
-      const validTill = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
 
       return NextResponse.json({
         success: true,
         requestId,
         status: "done",
         data: {
-          fileUrl,
-          fileName: "www.khanpdf.com.pdf",
-          pageCount: 1,
-          creditsUsed: 9,
-          durationMs: 2136,
-          outputLinkValidTill: validTill.toISOString(),
+          fileUrl: result.fileUrl,
+          fileName: result.fileName,
+          pageCount: result.pageCount,
+          creditsUsed: result.creditsUsed,
+          durationMs: result.durationMs,
+          outputLinkValidTill: result.outputLinkValidTill,
         },
         message: "Your PDF is ready.",
       }, {

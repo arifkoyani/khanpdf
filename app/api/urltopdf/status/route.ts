@@ -40,18 +40,18 @@ export async function GET(req: NextRequest) {
 
   if (job.status === "done") {
     await redis.expire(`job:${requestId}`, SEEN_DONE_TTL).catch(() => {});
-    const validTill = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const pdfJobResult = (job as any).pdfJobResult;
     return NextResponse.json({
       success: true,
       requestId,
       status: "done",
       data: {
         fileUrl: job.fileUrl,
-        fileName: "www.khanpdf.com.pdf",
-        pageCount: 1,
-        creditsUsed: 9,
-        durationMs: 2136,
-        outputLinkValidTill: validTill.toISOString(),
+        fileName: pdfJobResult?.fileName || "www.khanpdf.com.pdf",
+        pageCount: pdfJobResult?.pageCount || 1,
+        creditsUsed: pdfJobResult?.creditsUsed || 9,
+        durationMs: pdfJobResult?.durationMs || 0,
+        outputLinkValidTill: pdfJobResult?.outputLinkValidTill || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       },
       message: "Your PDF is ready.",
     }, {

@@ -4,6 +4,10 @@ interface PdfCoResponse {
   status: number;
   name?: string;
   message?: string;
+  pageCount?: number;
+  creditsUsed?: number;
+  durationMs?: number;
+  expiresAt?: string;
 }
 
 /** Optional PDF rendering settings forwarded from the frontend. */
@@ -21,12 +25,23 @@ const HEADER_HTML =
   "Create by <a href='https://khanpdf.com' style='color:#f16625;text-decoration:none'>khanpdf.com</a>" +
   "</span>";
 
+export interface PdfJobResult {
+  fileUrl: string;
+  fileName: string;
+  pageCount: number;
+  creditsUsed: number;
+  durationMs: number;
+  outputLinkValidTill: string;
+}
+
 // Calls khanpdf synchronously (async:false) and returns the final PDF URL directly.
 // Throws on any error so callers can handle failure uniformly.
 export async function submitPdfJob(
   url: string,
   options: PdfJobOptions = {}
-): Promise<string> {
+): Promise<PdfJobResult> {
+  const startTime = Date.now();
+
   const response = await fetch(process.env.KHAN_PDF_API_URL_TO_PDF_URL!, {
     method: "POST",
     headers: {
@@ -44,6 +59,8 @@ export async function submitPdfJob(
     }),
   });
 
+  const durationMs = Date.now() - startTime;
+
   if (!response.ok) {
     throw new Error(`khanpdf returned ${response.status}: ${response.statusText}`);
   }
@@ -58,5 +75,15 @@ export async function submitPdfJob(
     throw new Error("khanpdf returned no URL in response");
   }
 
-  return data.url;
+  // Calculate link expiration (default 24 hours from now)
+  const outputLinkValidTill = data.expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  return {
+    fileUrl: data.url,
+    fileName: data.name || "www.khanpdf.com.pdf",
+    pageCount: data.pageCount || 1,
+    creditsUsed: data.creditsUsed || 9,
+    durationMs: data.durationMs || durationMs,
+    outputLinkValidTill,
+  };
 }
