@@ -20,7 +20,7 @@ export function ToolCard() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="font-display text-lg md:text-xl font-bold">URL to PDF</h3>
+              <h2 className="font-display text-lg md:text-xl font-bold">URL to PDF</h2>
               <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
                 Convert any public webpage into a clean PDF file while keeping the page text, images, and layout readable.
               </p>

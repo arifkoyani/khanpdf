@@ -13,7 +13,7 @@ export function Hero() {
           The simplest way to turn any webpage into a PDF
         </div>
         <h1 className="font-display text-3xl md:text-5xl font-bold tracking-tight leading-[1.05] max-w-3xl mx-auto">
-          Convert <span className="text-gradient">URL to PDF</span><br className="hidden sm:block" /> Online
+          Convert <span className="text-gradient">URL to PDF Screenshots</span><br className="hidden sm:block" /> Online
         </h1>
         <p className="mt-4 text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
           Paste any public webpage URL and convert it into a clean, downloadable PDF file in seconds. No sign-up, no installation, and no extra steps.
