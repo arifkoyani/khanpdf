@@ -266,22 +266,44 @@
   }
   
   .light .url-input-3d-wrap {
-    box-shadow:
-      0 18px 40px -24px rgba(255, 85, 13, 0.45),
-      0 18px 42px -34px rgba(0, 0, 0, 0.35),
-      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.15);
+    border: 2px solid #f97316;
+    background: #ffffff !important;
+    animation: none;
   }
-  
+
+  /* Light mode input - clear visible styles */
+  .light .url-input-3d-wrap .url-input-3d {
+    background: #fafafa !important;
+    border: 2px solid #d1d5db !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .light .url-input-3d-wrap .url-input-3d:focus {
+    background: #ffffff !important;
+    border-color: #f16625 !important;
+    box-shadow: 0 0 0 4px rgba(241, 102, 37, 0.15) !important;
+    outline: none;
+  }
+
+  .light .url-input-3d-wrap .url-input-3d::placeholder {
+    color: #9ca3af !important;
+  }
+
+  /* Light mode checkmark - green circle with white check */
+  .light .url-input-3d-wrap .grid.place-items-center.rounded-full {
+    background: #22c55e !important;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
+  }
+
   .url-input-3d {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.06),
       inset 0 -10px 24px rgba(0, 0, 0, 0.18);
   }
-  
+
   .light .url-input-3d {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 -10px 24px rgba(0, 0, 0, 0.04);
+    box-shadow: none !important;
   }
   
   @keyframes url-input-border-spin {

@@ -328,7 +328,7 @@ export default function UrlToPdf() {
               maxWidth: "min(92vw, 1290px)",
               padding: "clamp(1.25rem, 3vw, 2rem)",
               minHeight: "clamp(18rem, 38vh, 24rem)",
-              marginTop: "4rem"
+              marginTop: "0rem"
             }}
           >
             {/* IDLE / INPUT */}
