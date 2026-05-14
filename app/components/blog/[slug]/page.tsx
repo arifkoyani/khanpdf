@@ -179,10 +179,10 @@ export default function BlogPostComponent({ slug }: { slug?: string }) {
 
         {/* ── Content wrapper ─────────────────────────────────────── */}
         <div className="px-5 pt-8 md:pt-10">
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto w-full px-4 sm:px-6 md:px-10 lg:px-20 xl:px-30">
 
             {/* ── Hero Thumbnail ──────────────────────────────────────── */}
-            <div className="relative w-full rounded-2xl overflow-hidden mb-10 mt-4 mb-4" style={{ aspectRatio: "1200/630" }}>
+            <div className="relative w-full rounded-xl overflow-hidden mb-8 mt-2 mb-4" style={{ aspectRatio: "1000/330" }}>
               <Image
                 src={article.thumbnail}
                 alt={article.title}
@@ -373,7 +373,7 @@ export default function BlogPostComponent({ slug }: { slug?: string }) {
                 </h2>
               </div>
               <div className="rounded-2xl overflow-hidden border border-border shadow-card">
-                <div className="relative w-full" style={{ aspectRatio: "12/7" }}>
+                <div className="relative w-full" style={{ aspectRatio: "6/3" }}>
                   <Image
                     src={article.infographic}
                     alt="URL to PDF conversion infographic"
@@ -414,7 +414,7 @@ export default function BlogPostComponent({ slug }: { slug?: string }) {
               <p className="text-sm text-muted-foreground leading-relaxed mb-5">
                 See exactly how the tool works — from pasting a URL to downloading a finished PDF — in under a minute.
               </p>
-              <div className="rounded-2xl overflow-hidden border border-border shadow-card h-[500px]">
+              <div className="rounded-xl overflow-hidden border border-border shadow-card h-[600px]">
                 <iframe
                   className="w-full h-full"
                   src={`https://www.youtube.com/embed/${article.videoId}`}

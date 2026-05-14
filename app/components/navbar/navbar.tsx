@@ -15,22 +15,22 @@ const navItems = [
 export default function Navbar() {
   const pathname = usePathname();
 
-  return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/60">
+  return ( 
+    <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/60 py-2">
       <div className="mx-auto max-w-5xl px-5 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <span className="font-display flex justify-center items-end font-bold text-sm tracking-tight gap-1">
             <Image
               src="/logo.png"
               alt="KhanPDF Logo"
-              width={20}
-              height={20}
+              width={30}
+              height={30}
             />
             <span className="text-foreground">KhanPDF</span>
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-muted-foreground">
+        <nav className="hidden md:flex items-center gap-12 text-[10px] font-medium text-muted-foreground">
           {navItems.map((item) => {
             const isActive = pathname === item.to;
 
@@ -38,11 +38,14 @@ export default function Navbar() {
               <Link
                 key={item.to}
                 href={item.to}
-                className={`hover:text-foreground transition-colors ${
-                  isActive ? "text-foreground" : ""
+                className={`relative hover:text-foreground transition-colors ${
+                  isActive ? "text-primary" : ""
                 }`}
               >
                 {item.label}
+                {isActive && (
+                  <span className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                )}
               </Link>
             );
           })}
