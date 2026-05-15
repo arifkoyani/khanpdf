@@ -1,5 +1,5 @@
 "use client"
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus,
   Search,
@@ -57,7 +57,6 @@ import {
 } from "../../components/ui/accordion";
 import { FileText as FileIcon, Image as ImageBlock, Layers, HelpCircle, Search as SearchIcon, LogOut } from "lucide-react";
 
-
 type BlogStatus = "draft" | "publish";
 
 type BlogItem = {
@@ -72,21 +71,7 @@ type BlogItem = {
   thumbnail_url: string;
 };
 
-const seedBlogs: BlogItem[] = [
-  {
-    id: "1",
-    title: "What Is URL to PDF?",
-    slug: "what-is-url-to-pdf",
-    description:
-      "A complete guide to converting public webpages into clean, downloadable PDF files in seconds.",
-    category: "URL to PDF",
-    status: "publish",
-    publish_date: "2026-05-10",
-    read_time: "10 min read",
-    thumbnail_url:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
-  }
-];
+
 
 type FAQ = { q: string; a: string };
 
@@ -97,7 +82,8 @@ type BlogForm = BlogItem & {
   mid_image_url: string;
   infographic_url: string;
   video_id: string;
-  body: string;
+  body_content: string;
+  conclusion: string;
   faqs: FAQ[];
 };
 
@@ -117,12 +103,15 @@ const emptyForm: BlogForm = {
   mid_image_url: "",
   infographic_url: "",
   video_id: "",
-  body: "",
+  body_content: "",
+conclusion: "",
   faqs: [{ q: "", a: "" }],
 };
 
 export default function BlogAdmin({ onLogout }: { onLogout?: () => void }) {
-  const [blogs, setBlogs] = useState<BlogItem[]>(seedBlogs);
+  const [blogs, setBlogs] = useState<BlogForm[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | BlogStatus>("all");
   const [editorOpen, setEditorOpen] = useState(false);
@@ -138,56 +127,227 @@ export default function BlogAdmin({ onLogout }: { onLogout?: () => void }) {
     });
   }, [blogs, search, statusFilter]);
 
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+  
+      const res = await fetch("/api/blogs/allblogs");
+      const data = await res.json();
+  
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to fetch blogs");
+      }
+  
+      setBlogs(data.blogs || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch blogs");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
   const openCreate = () => {
-    setForm({ ...emptyForm, id: crypto.randomUUID() });
+    setForm({ ...emptyForm });
     setEditorOpen(true);
   };
 
-  const openEdit = (blog: BlogItem) => {
+  const openEdit = (blog: BlogForm) => {
     setForm({
       ...emptyForm,
       ...blog,
-      meta_title: blog.title,
-      meta_description: blog.description,
-      canonical_url: "https://example.com/blog/" + blog.slug,
-      body:
-        "## Introduction\n\nThis blog explains the topic in depth.\n\n[MID_IMAGE]\n\n## How It Works\n\nA short walkthrough of the process.\n\n[VIDEO]\n\n## Full Process\n\nA visual recap of every step.\n\n[INFOGRAPHIC]",
-      faqs: [
-        { q: "Is this tool free?", a: "Yes, it is free to use." },
-        { q: "Do I need an account?", a: "No account required." },
-      ],
+      faqs: Array.isArray(blog.faqs) && blog.faqs.length > 0 ? blog.faqs : [{ q: "", a: "" }],
     });
+  
     setEditorOpen(true);
   };
 
-  const upsert = (next: BlogForm, status?: BlogStatus) => {
-    const final: BlogItem = {
-      id: next.id || crypto.randomUUID(),
-      title: next.title || "Untitled",
-      slug: next.slug,
-      description: next.description,
-      category: next.category,
-      status: status ?? next.status,
-      publish_date: next.publish_date,
-      read_time: next.read_time,
-      thumbnail_url:
-        next.thumbnail_url ||
-        "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80",
-    };
-    setBlogs((prev) => {
-      const exists = prev.find((p) => p.id === final.id);
-      return exists
-        ? prev.map((p) => (p.id === final.id ? final : p))
-        : [final, ...prev];
-    });
-    setEditorOpen(false);
+  const saveBlog = async (next: BlogForm, status: BlogStatus) => {
+    try {
+      setLoading(true);
+      setError(null);
+  
+      const payload = {
+        ...next,
+        status,
+        faqs: Array.isArray(next.faqs) ? next.faqs : [],
+      };
+  
+      const isEdit = Boolean(next.id);
+  
+      const res = await fetch(
+        isEdit ? "/api/blogs/updateblog" : "/api/blogs/createblog",
+        {
+          method: isEdit ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+  
+      const data = await res.json();
+  
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to save blog");
+      }
+  
+      setEditorOpen(false);
+      await fetchBlogs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save blog");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const setStatus = (id: string, status: BlogStatus) =>
-    setBlogs((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
 
-  const remove = (id: string) =>
-    setBlogs((prev) => prev.filter((b) => b.id !== id));
+
+
+  const setStatus = async (id: string, status: BlogStatus) => {
+    const blog = blogs.find((b) => b.id === id);
+    if (!blog) return;
+  
+    await saveBlog(
+      {
+        ...emptyForm,
+        ...blog,
+        status,
+        faqs: Array.isArray(blog.faqs) ? blog.faqs : [],
+      },
+      status
+    );
+  };
+
+
+  function ImageUploadField({
+    label,
+    value,
+    onChange,
+  }: {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+  }) {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+  
+    const handleFile = async (file?: File | null) => {
+      if (!file) return;
+  
+      try {
+        setUploading(true);
+        setUploadError(null);
+  
+        const uploadedUrl = await uploadMediaToSupabase(file);
+        onChange(uploadedUrl);
+      } catch (error) {
+        setUploadError(
+          error instanceof Error ? error.message : "Image upload failed"
+        );
+      } finally {
+        setUploading(false);
+  
+        if (inputRef.current) {
+          inputRef.current.value = "";
+        }
+      }
+    };
+  
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">{label}</Label>
+  
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            handleFile(e.dataTransfer.files?.[0]);
+          }}
+          className="rounded-xl border border-dashed p-4 flex items-center gap-4 bg-muted/30"
+        >
+          <div className="size-20 rounded-lg overflow-hidden bg-muted flex items-center justify-center shrink-0">
+            {value ? (
+              <img src={value} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <ImageIcon className="size-6 text-muted-foreground" />
+            )}
+          </div>
+  
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">
+              {uploading ? "Uploading..." : "Drag & drop or click to upload"}
+            </p>
+  
+            <p className="text-xs text-muted-foreground truncate">
+              {value ? value : "Saved URL will appear here after upload."}
+            </p>
+  
+            {uploadError && (
+              <p className="text-xs text-destructive mt-1">
+                {uploadError}
+              </p>
+            )}
+          </div>
+  
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={uploading}
+            onClick={() => inputRef.current?.click()}
+            className="gap-2"
+          >
+            <Upload className="size-4" />
+            {uploading ? "Uploading..." : "Upload"}
+          </Button>
+  
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => handleFile(e.target.files?.[0])}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const remove = async (id: string) => {
+    const confirmed = window.confirm("Are you sure you want to delete this blog?");
+    if (!confirmed) return;
+  
+    try {
+      setLoading(true);
+  
+      const res = await fetch("/api/blogs/deleteblog", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to delete blog");
+      }
+  
+      await fetchBlogs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete blog");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const stats = {
     total: blogs.length,
@@ -249,7 +409,17 @@ export default function BlogAdmin({ onLogout }: { onLogout?: () => void }) {
             </TabsList>
           </Tabs>
         </div>
+        {error && (
+  <p className="text-sm text-destructive mb-4">
+    {error}
+  </p>
+)}
 
+{loading && (
+  <p className="text-sm text-muted-foreground mb-4">
+    Loading...
+  </p>
+)}
         {filtered.length === 0 ? (
           <div className="border border-dashed rounded-xl p-16 text-center">
             <FileText className="size-10 mx-auto text-muted-foreground mb-3" />
@@ -276,8 +446,8 @@ export default function BlogAdmin({ onLogout }: { onLogout?: () => void }) {
         onOpenChange={setEditorOpen}
         form={form}
         setForm={setForm}
-        onSaveDraft={() => upsert(form, "draft")}
-        onPublish={() => upsert(form, "publish")}
+        onSaveDraft={() => saveBlog(form, "draft")}
+onPublish={() => saveBlog(form, "publish")}
       />
     </div>
   );
@@ -556,9 +726,9 @@ function BlogEditorDialog({
               subtitle="Body editor with draggable media blocks"
             >
               <BodyEditor
-                value={form.body}
-                onChange={(v) => update("body", v)}
-              />
+  value={form.body_content}
+  onChange={(v) => update("body_content", v)}
+/>
             </SectionItem>
 
             <SectionItem
@@ -714,6 +884,25 @@ function SectionItem({
   );
 }
 
+async function uploadMediaToSupabase(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("folder", "blog");
+
+  const res = await fetch("/api/blogs/uploadmedia", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Image upload failed");
+  }
+
+  return data.url as string;
+}
+
 function ImageUploadField({
   label,
   value,
@@ -724,14 +913,35 @@ function ImageUploadField({
   onChange: (v: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const handleFile = (file?: File | null) => {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFile = async (file?: File | null) => {
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    onChange(url);
+
+    try {
+      setUploading(true);
+      setUploadError(null);
+
+      const uploadedUrl = await uploadMediaToSupabase(file);
+      onChange(uploadedUrl);
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "Image upload failed"
+      );
+    } finally {
+      setUploading(false);
+
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+    }
   };
+
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium">{label}</Label>
+
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
@@ -747,26 +957,41 @@ function ImageUploadField({
             <ImageIcon className="size-6 text-muted-foreground" />
           )}
         </div>
+
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">Drag & drop or click to upload</p>
+          <p className="text-sm font-medium">
+            {uploading ? "Uploading..." : "Drag & drop or click to upload"}
+          </p>
+
           <p className="text-xs text-muted-foreground truncate">
             {value ? value : "Saved URL will appear here after upload."}
           </p>
+
+          {uploadError && (
+            <p className="text-xs text-destructive mt-1">
+              {uploadError}
+            </p>
+          )}
         </div>
+
         <Button
           type="button"
           variant="outline"
           size="sm"
+          disabled={uploading}
           onClick={() => inputRef.current?.click()}
           className="gap-2"
         >
-          <Upload className="size-4" /> Upload
+          <Upload className="size-4" />
+          {uploading ? "Uploading..." : "Upload"}
         </Button>
+
         <input
           ref={inputRef}
           type="file"
           accept="image/*"
           className="hidden"
+          disabled={uploading}
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
       </div>
