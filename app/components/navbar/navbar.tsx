@@ -44,7 +44,7 @@ export default function Navbar() {
               >
                 {item.label}
                 {isActive && (
-                  <span className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                  <span className="absolute  bg-primary rounded-full" />
                 )}
               </Link>
             );
@@ -58,3 +58,5 @@ export default function Navbar() {
     </header>
   );
 }
+
+
