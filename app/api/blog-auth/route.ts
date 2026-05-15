@@ -26,9 +26,9 @@ export async function POST(req: NextRequest) {
     // Use service role key for admin access
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Query the admins table
+    // Query the users table
     const { data, error } = await supabase
-      .from("admins")
+      .from("users")
       .select("email, password")
       .eq("email", email)
       .eq("password", password)

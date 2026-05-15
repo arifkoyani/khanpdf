@@ -56,6 +56,7 @@ import {
   AccordionContent,
 } from "../../components/ui/accordion";
 import { FileText as FileIcon, Image as ImageBlock, Layers, HelpCircle, Search as SearchIcon, LogOut } from "lucide-react";
+import BlogApiDocsSection from "./BlogApiDocsSection/BlogApiDocsSection";
 
 type BlogStatus = "draft" | "publish";
 
@@ -440,6 +441,9 @@ export default function BlogAdmin({ onLogout }: { onLogout?: () => void }) {
           </div>
         )}
       </main>
+
+
+      <BlogApiDocsSection />
 
       <BlogEditorDialog
         open={editorOpen}
