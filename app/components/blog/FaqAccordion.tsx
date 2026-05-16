@@ -5,7 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "../../components/ui/accordion";
 
 type FAQ = {
   q: string;
@@ -13,18 +13,20 @@ type FAQ = {
 };
 
 export default function FaqAccordion({ faqs }: { faqs: FAQ[] }) {
+  if (!faqs || faqs.length === 0) return null;
+
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="space-y-3">
       {faqs.map((faq, index) => (
         <AccordionItem
           key={index}
           value={`item-${index}`}
-          className="border rounded-xl px-5 mb-3 bg-card hover:border-primary/40 transition-colors"
+          className="rounded-xl border border-border bg-card px-5 data-[state=open]:shadow-card data-[state=open]:border-primary/40 transition-all"
         >
-          <AccordionTrigger className="text-base font-semibold text-gray-900 hover:no-underline py-4">
+          <AccordionTrigger className="text-left font-display font-semibold text-sm hover:no-underline py-4">
             {faq.q}
           </AccordionTrigger>
-          <AccordionContent className="text-gray-600 leading-7 pb-4">
+          <AccordionContent className="text-xs text-muted-foreground leading-relaxed pb-4">
             {faq.a}
           </AccordionContent>
         </AccordionItem>

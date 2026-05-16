@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import FaqAccordion from "../../components/faqs/faqs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../../components/ui/accordion";
 
 type FAQ = {
   q: string;
@@ -192,6 +197,22 @@ function renderBodyContent(blog: BlogPost) {
   });
 }
 
+function normalizeFaqs(faqs: BlogPost["faqs"] | string | null) {
+  if (!faqs) return [];
+
+  if (Array.isArray(faqs)) return faqs;
+
+  if (typeof faqs === "string") {
+    try {
+      return JSON.parse(faqs) as FAQ[];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
 export default async function BlogDetailsPage({ params }: Props) {
   const { slug } = await params;
   const blog = await getBlogPost(slug);
@@ -199,7 +220,7 @@ export default async function BlogDetailsPage({ params }: Props) {
   if (!blog) notFound();
 
   const publishedDate = formatDate(blog.publish_date || blog.created_at);
-  const faqs = Array.isArray(blog.faqs) ? blog.faqs : [];
+  const faqs = normalizeFaqs(blog.faqs);
 
   return (
     <article className="min-h-screen bg-white">
@@ -250,15 +271,31 @@ export default async function BlogDetailsPage({ params }: Props) {
           </section>
         )}
 
-        {faqs.length > 0 && (
-          <section className="mt-12">
-            <h2 className="mb-6 text-3xl font-bold text-gray-950">
-              Frequently Asked Questions
-            </h2>
+{faqs.length > 0 && (
+  <section className="mt-12">
+    <h2 className="mb-6 text-3xl font-bold text-gray-950">
+      Frequently Asked Questions
+    </h2>
 
-            <FaqAccordion faqs={faqs} />
-          </section>
-        )}
+    <Accordion type="single" collapsible className="w-full space-y-4">
+      {faqs.map((faq, index) => (
+        <AccordionItem
+          key={index}
+          value={`faq-${index}`}
+          className="rounded-2xl border px-5"
+        >
+          <AccordionTrigger className="text-left text-lg font-semibold text-gray-950 hover:no-underline">
+            {faq.q}
+          </AccordionTrigger>
+
+          <AccordionContent className="leading-7 text-gray-600">
+            {faq.a}
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  </section>
+)}
       </section>
     </article>
   );
