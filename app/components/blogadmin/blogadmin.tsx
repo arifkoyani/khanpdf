@@ -81,7 +81,8 @@ type BlogForm = BlogItem & {
   meta_title: string;
   meta_description: string;
   canonical_url: string;
-  mid_image_url: string;
+  thumbnail_alt: string;
+  infographic_alt: string;
   infographic_url: string;
   video_id: string;
   body_content: string;
@@ -102,11 +103,12 @@ const emptyForm: BlogForm = {
   meta_title: "",
   meta_description: "",
   canonical_url: "",
-  mid_image_url: "",
+  thumbnail_alt: "",
+  infographic_alt: "",
   infographic_url: "",
   video_id: "",
   body_content: "",
-conclusion: "",
+  conclusion: "",
   faqs: [{ q: "", a: "" }],
 };
 
@@ -701,16 +703,25 @@ function BlogEditorDialog({
                 value={form.thumbnail_url}
                 onChange={(v) => update("thumbnail_url", v)}
               />
-              <ImageUploadField
-                label="Middle Image"
-                value={form.mid_image_url}
-                onChange={(v) => update("mid_image_url", v)}
-              />
+              <Field label="Thumbnail Alt Text">
+                <Input
+                  value={form.thumbnail_alt}
+                  onChange={(e) => update("thumbnail_alt", e.target.value)}
+                  placeholder="Describe the thumbnail image for accessibility"
+                />
+              </Field>
               <ImageUploadField
                 label="Infographic Image"
                 value={form.infographic_url}
                 onChange={(v) => update("infographic_url", v)}
               />
+              <Field label="Infographic Alt Text">
+                <Input
+                  value={form.infographic_alt}
+                  onChange={(e) => update("infographic_alt", e.target.value)}
+                  placeholder="Describe the infographic image for accessibility"
+                />
+              </Field>
               <Field
                 label="YouTube Video ID"
                 hint="Only the ID, e.g. dQw4w9WgXcQ — not the full URL."
@@ -1005,7 +1016,6 @@ function ImageUploadField({
 }
 
 const PLACEHOLDERS = [
-  { token: "[MID_IMAGE]", label: "Middle Image", icon: ImageIcon },
   { token: "[VIDEO]", label: "YouTube Video", icon: Video },
   { token: "[INFOGRAPHIC]", label: "Infographic", icon: BarChart3 },
 ] as const;
@@ -1067,7 +1077,7 @@ function BodyEditor({
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
           rows={20}
-          placeholder={"## Introduction\n\nWrite your blog content here.\n\n[MID_IMAGE]\n\n## How It Works\n\n[VIDEO]\n\n## Wrap-up\n\n[INFOGRAPHIC]"}
+          placeholder={"## Introduction\n\nWrite your blog content here.\n\n## How It Works\n\n[VIDEO]\n\n## Wrap-up\n\n[INFOGRAPHIC]"}
           className={
             "font-mono text-sm leading-relaxed min-h-[420px] transition-colors " +
             (draggingToken ? "ring-2 ring-primary border-primary" : "")

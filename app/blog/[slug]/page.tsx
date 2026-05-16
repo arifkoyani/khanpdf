@@ -21,8 +21,9 @@ type BlogPost = {
   publish_date: string | null;
   status: "draft" | "publish";
   thumbnail_url: string | null;
-  mid_image_url: string | null;
+  thumbnail_alt: string | null;
   infographic_url: string | null;
+  infographic_alt: string | null;
   video_id: string | null;
   meta_title: string | null;
   meta_description: string | null;
@@ -72,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: canonical,
       type: "article",
-      images: [{ url: image, width: 1200, height: 630, alt: blog.title }],
+      images: [{ url: image, width: 1200, height: 630, alt: blog.thumbnail_alt || blog.title }],
       publishedTime: blog.publish_date || blog.created_at,
       modifiedTime: blog.updated_at,
     },
@@ -203,20 +204,10 @@ function renderBlock(text: string, keyPrefix: string) {
 
 function renderBodyContent(blog: BlogPost) {
   const content = blog.body_content || "";
-  const parts = content.split(/(\[MID_IMAGE\]|\[VIDEO\]|\[INFOGRAPHIC\])/g);
+  const parts = content.split(/(\[VIDEO\]|\[INFOGRAPHIC\])/g);
 
   return parts.map((part, index) => {
-    if (part === "[MID_IMAGE]") {
-      if (!blog.mid_image_url) return null;
-      return (
-        <Image
-          key={`mid-${index}`}
-          src={blog.mid_image_url}
-          alt={`${blog.title} mid image`}
-          className="my-10 w-full rounded-2xl border border-border object-cover shadow-sm"
-        />
-      );
-    }
+  
     if (part === "[VIDEO]") {
       if (!blog.video_id) return null;
       return (
@@ -240,7 +231,7 @@ function renderBodyContent(blog: BlogPost) {
         <Image
           key={`info-${index}`}
           src={blog.infographic_url}
-          alt={`${blog.title} infographic`}
+          alt={blog.infographic_alt || `${blog.title} infographic`}
           className="my-10 w-full rounded-2xl border border-border object-cover shadow-sm"
         />
       );
@@ -284,7 +275,7 @@ export default async function BlogDetailsPage({ params }: Props) {
           <div className="mb-10 overflow-hidden rounded-3xl border border-border shadow-sm">
             <img
               src={blog.thumbnail_url}
-              alt={blog.title}
+              alt={blog.thumbnail_alt || blog.title}
               className="aspect-[16/9] w-full object-cover"
             />
           </div>

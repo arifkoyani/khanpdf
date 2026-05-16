@@ -53,8 +53,9 @@ export async function PATCH(req: Request) {
       status: body.status || "draft",
 
       thumbnail_url: body.thumbnail_url || null,
-      mid_image_url: body.mid_image_url || null,
+      thumbnail_alt: body.thumbnail_alt || null,
       infographic_url: body.infographic_url || null,
+      infographic_alt: body.infographic_alt || null,
       video_id: body.video_id || null,
 
       meta_title: body.meta_title || null,
