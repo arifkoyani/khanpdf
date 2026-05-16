@@ -273,22 +273,27 @@ export default async function BlogDetailsPage({ params }: Props) {
 
 {faqs.length > 0 && (
   <section className="mt-12">
-    <h2 className="mb-6 text-3xl font-bold text-gray-950">
-      Frequently Asked Questions
-    </h2>
+    <div className="text-center mb-8">
+      <p className="label-mono text-primary inline-flex items-center gap-2 justify-center">
+        <span className="h-1 w-1 rounded-full bg-primary" /> FAQ
+      </p>
+      <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold tracking-[-0.025em]">
+        Frequently asked{" "}
+        <span className="text-gradient-headline">questions</span>
+      </h2>
+    </div>
 
-    <Accordion type="single" collapsible className="w-full space-y-4">
+    <Accordion type="single" collapsible className="w-full space-y-2">
       {faqs.map((faq, index) => (
         <AccordionItem
           key={index}
           value={`faq-${index}`}
-          className="rounded-2xl border px-5"
+          className="rounded-xl border border-border bg-card px-5 data-[state=open]:shadow-card data-[state=open]:border-primary/40 transition-all"
         >
-          <AccordionTrigger className="text-left text-lg font-semibold text-gray-950 hover:no-underline">
+          <AccordionTrigger className="text-left font-display font-semibold text-sm hover:no-underline py-4">
             {faq.q}
           </AccordionTrigger>
-
-          <AccordionContent className="leading-7 text-gray-600">
+          <AccordionContent className="text-xs text-muted-foreground leading-relaxed pb-4">
             {faq.a}
           </AccordionContent>
         </AccordionItem>
@@ -296,6 +301,7 @@ export default async function BlogDetailsPage({ params }: Props) {
     </Accordion>
   </section>
 )}
+
       </section>
     </article>
   );
