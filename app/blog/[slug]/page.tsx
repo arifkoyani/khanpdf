@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import FaqAccordion from "@/components/blog/FaqAccordion";
 
 type FAQ = {
   q: string;
@@ -255,16 +256,7 @@ export default async function BlogDetailsPage({ params }: Props) {
               Frequently Asked Questions
             </h2>
 
-            <div className="space-y-4">
-              {faqs.map((faq, index) => (
-                <div key={index} className="rounded-2xl border p-5">
-                  <h3 className="mb-2 text-lg font-semibold text-gray-950">
-                    {faq.q}
-                  </h3>
-                  <p className="leading-7 text-gray-600">{faq.a}</p>
-                </div>
-              ))}
-            </div>
+            <FaqAccordion faqs={faqs} />
           </section>
         )}
       </section>
