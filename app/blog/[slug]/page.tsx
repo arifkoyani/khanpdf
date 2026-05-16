@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Calendar, Clock, ArrowUpRight, Sparkles } from "lucide-react";
+import Image from "next/image";
 import {
   Accordion,
   AccordionContent,
@@ -119,14 +120,14 @@ function renderBlock(text: string, keyPrefix: string) {
     nodes.push(
       <ul
         key={`${keyPrefix}-ul-${nodes.length}`}
-        className="my-6 space-y-3 rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur-sm"
+        className="my-6 space-y-3 rounded-2xl border border-border/60 bg-muted/30 p-6 backdrop-blur-sm"
       >
         {bulletBuffer.map((item, i) => (
           <li
             key={i}
             className="flex items-start gap-3 text-base leading-7 text-muted-foreground"
           >
-            <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary/40" />
+            <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
             <span>{item}</span>
           </li>
         ))}
@@ -139,7 +140,6 @@ function renderBlock(text: string, keyPrefix: string) {
     const line = rawLine.trimEnd();
     const key = `${keyPrefix}-${i}`;
 
-    // bullet
     if (/^\s*-\s+/.test(line)) {
       bulletBuffer.push(line.replace(/^\s*-\s+/, ""));
       return;
@@ -148,12 +148,11 @@ function renderBlock(text: string, keyPrefix: string) {
 
     if (!line.trim()) return;
 
-    // ### h3
     if (/^###\s+/.test(line)) {
       nodes.push(
         <div
           key={key}
-          className="mt-8 mb-3 rounded-xl border border-border/60 bg-card/50 px-5 py-3"
+          className="mt-8 mb-3 rounded-xl border border-border/60 bg-muted/30 px-5 py-3"
         >
           <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-foreground">
             {line.replace(/^###\s+/, "")}
@@ -163,41 +162,34 @@ function renderBlock(text: string, keyPrefix: string) {
       return;
     }
 
-    // ## h2
     if (/^##\s+/.test(line)) {
       nodes.push(
         <div
           key={key}
-          className="mt-12 mb-4 rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-card px-6 py-4 shadow-card"
+          className="mt-12 mb-4 rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-muted px-6 py-4 shadow-sm"
         >
-          <h2 className="font-display text-2xl md:text-3xl font-bold tracking-[-0.025em]">
-            <span className="text-gradient-headline">
-              {line.replace(/^##\s+/, "")}
-            </span>
+          <h2 className="font-display text-2xl md:text-3xl font-bold tracking-[-0.025em] text-foreground">
+            {line.replace(/^##\s+/, "")}
           </h2>
         </div>,
       );
       return;
     }
 
-    // # h1
     if (/^#\s+/.test(line)) {
       nodes.push(
         <div
           key={key}
-          className="mt-14 mb-6 rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-card to-card px-7 py-6 shadow-glow"
+          className="mt-14 mb-6 rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-background to-background px-7 py-6 shadow-sm"
         >
-          <h1 className="font-display text-3xl md:text-4xl font-bold tracking-[-0.03em] leading-[1.1]">
-            <span className="text-gradient-headline">
-              {line.replace(/^#\s+/, "")}
-            </span>
+          <h1 className="font-display text-3xl md:text-4xl font-bold tracking-[-0.03em] leading-[1.1] text-foreground">
+            {line.replace(/^#\s+/, "")}
           </h1>
         </div>,
       );
       return;
     }
 
-    // plain paragraph
     nodes.push(
       <p key={key} className="my-4 text-base leading-8 text-muted-foreground">
         {line}
@@ -217,11 +209,11 @@ function renderBodyContent(blog: BlogPost) {
     if (part === "[MID_IMAGE]") {
       if (!blog.mid_image_url) return null;
       return (
-        <img
+        <Image
           key={`mid-${index}`}
           src={blog.mid_image_url}
           alt={`${blog.title} mid image`}
-          className="my-10 w-full rounded-2xl border border-border object-cover shadow-card"
+          className="my-10 w-full rounded-2xl border border-border object-cover shadow-sm"
         />
       );
     }
@@ -230,7 +222,7 @@ function renderBodyContent(blog: BlogPost) {
       return (
         <div
           key={`vid-${index}`}
-          className="my-10 aspect-video w-full overflow-hidden rounded-2xl border border-border shadow-card"
+          className="my-10 aspect-video w-full overflow-hidden rounded-2xl border border-border shadow-sm"
         >
           <iframe
             src={`https://www.youtube.com/embed/${blog.video_id}`}
@@ -245,11 +237,11 @@ function renderBodyContent(blog: BlogPost) {
     if (part === "[INFOGRAPHIC]") {
       if (!blog.infographic_url) return null;
       return (
-        <img
+        <Image
           key={`info-${index}`}
           src={blog.infographic_url}
           alt={`${blog.title} infographic`}
-          className="my-10 w-full rounded-2xl border border-border object-cover shadow-card"
+          className="my-10 w-full rounded-2xl border border-border object-cover shadow-sm"
         />
       );
     }
@@ -282,14 +274,14 @@ export default async function BlogDetailsPage({ params }: Props) {
 
   return (
     <article className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      {/* Ambient background */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[600px] bg-gradient-hero opacity-70" />
-      <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" />
+      {/* Ambient background - hidden in light mode */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[600px] bg-gradient-hero opacity-70 dark:block hidden" />
+      <div className="pointer-events-none absolute inset-0 grid-bg opacity-40 dark:block hidden" />
 
-      <section className="relative mx-auto max-w-4xl px-5 py-14 md:py-20">
+      <section className="relative mx-auto max-w-7xl px-8 py-14 md:py-20">
         {/* Thumbnail */}
         {blog.thumbnail_url && (
-          <div className="mb-10 overflow-hidden rounded-3xl border border-border shadow-glow">
+          <div className="mb-10 overflow-hidden rounded-3xl border border-border shadow-sm">
             <img
               src={blog.thumbnail_url}
               alt={blog.title}
@@ -301,14 +293,14 @@ export default async function BlogDetailsPage({ params }: Props) {
         {/* Header */}
         <header className="mb-10 text-center">
           {blog.category && (
-            <p className="label-mono text-primary mb-5 inline-flex items-center justify-center gap-2">
+            <p className="mb-5 inline-flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-primary">
               <Sparkles className="h-3 w-3" />
               {blog.category}
             </p>
           )}
 
-          <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-[-0.03em] md:text-6xl">
-            <span className="text-gradient-headline">{blog.title}</span>
+          <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-[-0.03em] text-foreground md:text-6xl">
+            {blog.title}
           </h1>
 
           {blog.description && (
@@ -317,7 +309,7 @@ export default async function BlogDetailsPage({ params }: Props) {
             </p>
           )}
 
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-2 text-sm text-muted-foreground">
             {publishedDate && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5">
                 <Calendar className="h-3 w-3 text-primary" />
@@ -336,17 +328,17 @@ export default async function BlogDetailsPage({ params }: Props) {
         </header>
 
         {/* Body */}
-        <div className="prose prose-invert max-w-none">
+        <div className="prose prose-lg max-w-none">
           {renderBodyContent(blog)}
         </div>
 
         {/* Conclusion */}
         {blog.conclusion && (
-          <section className="mt-14 rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-card p-8 shadow-card">
-            <p className="label-mono text-primary mb-3 inline-flex items-center gap-2">
+          <section className="mt-14 rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-muted p-8">
+            <p className="mb-3 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-primary">
               <span className="h-1 w-1 rounded-full bg-primary" /> Final thoughts
             </p>
-            <h2 className="font-display mb-4 text-2xl font-bold tracking-[-0.025em] md:text-3xl">
+            <h2 className="font-display mb-4 text-2xl font-bold tracking-[-0.025em] text-foreground md:text-3xl">
               Conclusion
             </h2>
             <p className="whitespace-pre-wrap leading-8 text-muted-foreground">
@@ -359,26 +351,25 @@ export default async function BlogDetailsPage({ params }: Props) {
         {faqs.length > 0 && (
           <section className="mt-14">
             <div className="mb-8 text-center">
-              <p className="label-mono text-primary inline-flex items-center justify-center gap-2">
+              <p className="inline-flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-primary">
                 <span className="h-1 w-1 rounded-full bg-primary" /> FAQ
               </p>
-              <h2 className="font-display mt-3 text-3xl font-bold tracking-[-0.025em] md:text-4xl">
-                Frequently asked{" "}
-                <span className="text-gradient-headline">questions</span>
+              <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.025em] text-foreground md:text-4xl">
+                Frequently asked questions
               </h2>
             </div>
 
-            <Accordion type="single" collapsible className="w-full space-y-2">
+            <Accordion type="single" collapsible className="w-full space-y-3">
               {faqs.map((faq, index) => (
                 <AccordionItem
                   key={index}
                   value={`faq-${index}`}
-                  className="rounded-xl border border-border bg-card px-5 transition-all data-[state=open]:border-primary/40 data-[state=open]:shadow-card"
+                  className="rounded-xl border border-border bg-card px-5 transition-all hover:border-primary/30 data-[state=open]:border-primary/40 data-[state=open]:shadow-sm"
                 >
-                  <AccordionTrigger className="font-display py-4 text-left text-sm font-semibold hover:no-underline">
+                  <AccordionTrigger className="font-display py-4 text-left text-sm font-semibold text-foreground hover:no-underline">
                     {faq.q}
                   </AccordionTrigger>
-                  <AccordionContent className="pb-4 text-xs leading-relaxed text-muted-foreground">
+                  <AccordionContent className="pb-4 text-sm leading-relaxed text-muted-foreground">
                     {faq.a}
                   </AccordionContent>
                 </AccordionItem>
@@ -388,8 +379,8 @@ export default async function BlogDetailsPage({ params }: Props) {
         )}
 
         {/* CTA */}
-        <section className="mt-16 rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-card to-card p-10 text-center shadow-glow">
-          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] md:text-3xl">
+        <section className="mt-16 rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-background to-background p-10 text-center">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-foreground md:text-3xl">
             Ready to try it yourself?
           </h2>
           <p className="mt-3 text-sm text-muted-foreground md:text-base">
@@ -398,7 +389,7 @@ export default async function BlogDetailsPage({ params }: Props) {
           </p>
           <a
             href="/"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition hover:opacity-90"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
           >
             Explore KhanPDF Tools
             <ArrowUpRight className="h-4 w-4" />
