@@ -231,7 +231,7 @@ function renderBodyContent(blog: BlogPost) {
         <Image
           key={`info-${index}`}
           src={blog.infographic_url}
-          alt={blog.infographic_alt || `${blog.title} KhanPDF blog infographic || khanpdf pdf `}
+          alt={blog.infographic_alt + blog.title+"khanpdf pdf || KhanPDF blog infographic image"}
           className="my-10 w-full rounded-2xl border border-border object-cover shadow-sm"
         />
       );
