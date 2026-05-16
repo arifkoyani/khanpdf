@@ -262,7 +262,7 @@ const [emailSent, setEmailSent] = useState(false);
             setEmailValue(e.target.value);
             setEmailSent(false);
           }}
-          className="h-11 w-[100px] flex-1 bg-background/60 border border-border rounded-xl px-4 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground text-sm"
+          className="h-11 flex-1 bg-background/60 border border-border rounded-xl px-4 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground text-sm"
         />
 
         <button
@@ -270,7 +270,7 @@ const [emailSent, setEmailSent] = useState(false);
           onClick={handleSendEmail}
           disabled={emailSending || !fileUrl}
           title="Send PDF to email"
-          className="h-11 w-full cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed text-sm"
+          className="h-11 min-w-[86px] cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed text-sm"
           style={{
             background: BRAND,
             boxShadow: `0 10px 30px -10px ${BRAND}`,
