@@ -10,7 +10,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const BUCKET_NAME = "khanpdf_bucket";
 
 const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const maxFileSize = 5 * 1024 * 1024; // 5MB
+const maxFileSize = 6 * 1024 * 1024; // 5MB
 
 export async function POST(req: Request) {
   try {
