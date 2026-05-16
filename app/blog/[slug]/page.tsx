@@ -273,9 +273,9 @@ export default async function BlogDetailsPage({ params }: Props) {
         {/* Thumbnail */}
         {blog.thumbnail_url && (
           <div className="mb-10 overflow-hidden rounded-3xl border border-border shadow-sm">
-            <img
+            <Image
               src={blog.thumbnail_url}
-              alt={blog.thumbnail_alt || blog.title}
+              alt={blog.thumbnail_alt +" and "+ blog.title}
               className="aspect-[16/9] w-full object-cover"
             />
           </div>
