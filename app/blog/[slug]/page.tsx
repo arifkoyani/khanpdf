@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import FaqAccordion from "@/components/blog/FaqAccordion";
+import FaqAccordion from "../../components/faqs/faqs";
 
 type FAQ = {
   q: string;
