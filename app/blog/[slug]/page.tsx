@@ -1,4 +1,3 @@
-import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -35,18 +34,20 @@ type Props = {
 };
 
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const decodedSlug = decodeURIComponent(slug).trim();
+  const appBaseUrl = process.env.APP_BASE_URL || "https://khanpdf.com";
+  const decodedSlug = encodeURIComponent(slug);
 
-  const { data, error } = await supabase
-    .from("blog_posts")
-    .select("*")
-    .eq("slug", decodedSlug)
-    .eq("status", "publish")
-    .single();
+  const res = await fetch(`${appBaseUrl}/api/blogs/${decodedSlug}`, {
+    cache: "no-store",
+  });
 
-  if (error || !data) return null;
+  if (!res.ok) return null;
 
-  return data as BlogPost;
+  const data = await res.json();
+
+  if (!data.success || !data.blog) return null;
+
+  return data.blog as BlogPost;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -99,12 +100,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-  const { data } = await supabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) return [];
+
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  const { data, error } = await supabase
     .from("blog_posts")
     .select("slug")
     .eq("status", "publish");
 
-  if (!data) return [];
+  if (error || !data) return [];
 
   return data.map((blog) => ({
     slug: blog.slug,
