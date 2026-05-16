@@ -58,6 +58,9 @@ export default function OpenPdfViewer() {
     const [copied, setCopied] = useState(false);
     const pollRef = useRef<number | null>(null);
     const tickRef = useRef<number | null>(null);
+    const [emailValue, setEmailValue] = useState("");
+const [emailSending, setEmailSending] = useState(false);
+const [emailSent, setEmailSent] = useState(false);
 
     // Poll status
     useEffect(() => {
@@ -187,37 +190,122 @@ export default function OpenPdfViewer() {
         }
     };
 
+
+    const handleSendEmail = async () => {
+        if (!fileUrl) {
+          setError("PDF URL not found.");
+          return;
+        }
+      
+        if (!emailValue.trim()) {
+          setError("Please enter your email.");
+          return;
+        }
+      
+        try {
+          setError(null);
+          setEmailSending(true);
+      
+          const res = await fetch("/api/sendemail", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: emailValue.trim(),
+              fileUrl,
+            }),
+          });
+      
+          const data = await res.json();
+      
+          if (!res.ok || !data.success) {
+            throw new Error(data.error || "Failed to send email.");
+          }
+      
+          setEmailSent(true);
+          setEmailValue("");
+        } catch (e: unknown) {
+          setEmailSent(false);
+          setError(e instanceof Error ? e.message : "Failed to send email.");
+        } finally {
+          setEmailSending(false);
+        }
+      };
+
     return (
         <div className="min-h-screen bg-background text-foreground">
 
             <main className="mx-auto max-w-10xl px-5 py-8 md:py-12 space-y-10 mt-8">
                 {/* Top row: title + actions */}
-                <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                        <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight">
-                            Your PDF preview
-                        </h1>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            Hosted on KhanPDF — request{" "}
-                            <span className="font-mono text-foreground/80">
-                                {requestId || "—"}
-                            </span>
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        <Link
-                            href="/"
-                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
-                            style={{
-                                background: BRAND,
-                                border: "1px solid rgba(255,255,255,0.85)",
-                                boxShadow: `0 10px 30px -12px ${BRAND}`,
-                            }}
-                        >
-                            <RotateCcw className="h-4 w-4" /> Convert Another URL
-                        </Link>
-                    </div>
-                </section>
+                <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+  <div>
+    <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight">
+      Your PDF preview
+    </h1>
+    <p className="text-sm text-muted-foreground mt-1">
+      Hosted on KhanPDF — request{" "}
+      <span className="font-mono text-foreground/80">
+        {requestId || "—"}
+      </span>
+    </p>
+  </div>
+
+  <div className="flex flex-col md:flex-row md:items-center gap-3 w-full lg:w-auto">
+    <div className="flex flex-col w-full md:w-[420px] gap-2">
+      <div className="flex w-full gap-2">
+        <input
+          type="email"
+          placeholder="you@example.com"
+          value={emailValue}
+          onChange={(e) => {
+            setEmailValue(e.target.value);
+            setEmailSent(false);
+          }}
+          className="h-11 w-[100px] flex-1 bg-background/60 border border-border rounded-xl px-4 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground text-sm"
+        />
+
+        <button
+          type="button"
+          onClick={handleSendEmail}
+          disabled={emailSending || !fileUrl}
+          title="Send PDF to email"
+          className="h-11 w-full cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed text-sm"
+          style={{
+            background: BRAND,
+            boxShadow: `0 10px 30px -10px ${BRAND}`,
+          }}
+        >
+          {emailSending ? (
+            <span className="animate-pulse">Sending...</span>
+          ) : emailSent ? (
+            <Check className="h-4 w-4" strokeWidth={3} />
+          ) : (
+            "Send"
+          )}
+        </button>
+      </div>
+
+      {emailSent && (
+        <p className="text-xs text-green-500 pl-1">
+          PDF sent successfully
+        </p>
+      )}
+    </div>
+
+    <Link
+      href="/"
+      className="h-11 inline-flex items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 whitespace-nowrap"
+      style={{
+        background: BRAND,
+        border: "1px solid rgba(255,255,255,0.85)",
+        boxShadow: `0 10px 30px -12px ${BRAND}`,
+      }}
+    >
+      <RotateCcw className="h-4 w-4" /> Convert Another URL
+    </Link>
+  </div>
+</section>
 
                 {/* Viewer */}
                 <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-elegant mt-8">

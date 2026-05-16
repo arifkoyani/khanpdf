@@ -231,7 +231,7 @@ function renderBodyContent(blog: BlogPost) {
         <Image
           key={`info-${index}`}
           src={blog.infographic_url}
-          alt={blog.infographic_alt + blog.title+"khanpdf pdf || KhanPDF blog infographic image"}
+          alt={blog.infographic_alt + blog.title+" khanpdf pdf || KhanPDF blog Infographic image"}
           className="my-10 w-full rounded-2xl border border-border object-cover shadow-sm"
         />
       );
@@ -275,7 +275,7 @@ export default async function BlogDetailsPage({ params }: Props) {
           <div className="mb-10 overflow-hidden rounded-3xl border border-border shadow-sm">
             <Image
               src={blog.thumbnail_url}
-              alt={blog.thumbnail_alt +" and "+ blog.title+"khanpdf pdf ||  KhanPDF blog thumbnail "}
+              alt={blog.thumbnail_alt +" and "+ blog.title+"khanpdf pdf ||  KhanPDF blog Thumbnail image"}
               className="aspect-[16/9] w-full object-cover"
             />
           </div>

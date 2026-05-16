@@ -69,6 +69,7 @@ export default function UrlToPdf() {
   const [requestId, setRequestId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const pollRef = useRef<number | null>(null);
+  
 
   // Email send
   const [emailValue, setEmailValue] = useState("");

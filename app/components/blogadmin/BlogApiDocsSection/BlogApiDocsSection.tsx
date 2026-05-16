@@ -51,13 +51,14 @@ const docs = [
     "publish_date": "2026-05-15",
     "status": "publish",
     "thumbnail_url": "https://example.com/thumbnail.jpg",
-    "mid_image_url": "https://example.com/middle.jpg",
+    "thumbnail_alt": "URL to PDF tool conversion example",
     "infographic_url": "https://example.com/infographic.jpg",
+    "infographic_alt": "How URL to PDF conversion works infographic",
     "video_id": "dQw4w9WgXcQ",
     "meta_title": "What Is URL to PDF? Complete Guide | KhanPDF",
     "meta_description": "Learn what URL to PDF means and how it works.",
     "canonical_url": "https://khanpdf.com/blog/what-is-url-to-pdf-and-how-it-works",
-    "body_content": "## Introduction\\n\\nURL to PDF helps convert webpages into PDFs.\\n\\n[MID_IMAGE]\\n\\n[VIDEO]\\n\\n[INFOGRAPHIC]",
+    "body_content": "## Introduction\\n\\nURL to PDF helps convert webpages into PDFs.\\n\\n[VIDEO]\\n\\n[INFOGRAPHIC]",
     "conclusion": "URL to PDF is useful for saving and sharing webpages.",
     "faqs": [
       {
@@ -86,13 +87,14 @@ const docs = [
     "publish_date": "2026-05-15",
     "status": "publish",
     "thumbnail_url": "https://example.com/updated-thumbnail.jpg",
-    "mid_image_url": "https://example.com/updated-middle.jpg",
+    "thumbnail_alt": "Updated thumbnail alt text",
     "infographic_url": "https://example.com/updated-infographic.jpg",
+    "infographic_alt": "Updated infographic alt text",
     "video_id": "dQw4w9WgXcQ",
     "meta_title": "Updated URL to PDF Guide | KhanPDF",
     "meta_description": "Updated SEO description.",
     "canonical_url": "https://khanpdf.com/blog/updated-url-to-pdf-guide",
-    "body_content": "## Updated Introduction\\n\\nUpdated body content here.",
+    "body_content": "## Updated Introduction\\n\\nUpdated body content here.\\n\\n[VIDEO]\\n\\n[INFOGRAPHIC]",
     "conclusion": "Updated conclusion here.",
     "faqs": [
       {
@@ -121,7 +123,7 @@ const docs = [
     method: "POST",
     endpoint: "/api/blogs/uploadmedia",
     icon: Upload,
-    description: "Upload thumbnail, middle image, or infographic image to Supabase Storage bucket.",
+    description: "Upload thumbnail or infographic image to Supabase Storage bucket.",
     curl: `curl -X POST "${API_BASE}/api/blogs/uploadmedia" \\
   -F "file=@/path/to/image.png" \\
   -F "folder=blog"`,
