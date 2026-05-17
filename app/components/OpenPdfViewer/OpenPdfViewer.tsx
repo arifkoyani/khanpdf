@@ -59,6 +59,69 @@ function formatLocal(date: Date) {
 }
 
 
+const BLOCKED_EMAIL_DOMAINS = new Set([
+    "test.com",
+    "example.com",
+    "abc.com",
+    "localhost.com",
+  ]);
+  
+  const DISPOSABLE_EMAIL_KEYWORDS = [
+    "tempmail",
+    "10minutemail",
+    "mailinator",
+    "guerrillamail",
+    "yopmail",
+    "trashmail",
+  ];
+  
+  function isValidEmail(email: string) {
+    const value = email.trim().toLowerCase();
+  
+    if (!value) return false; // required
+    if (/\s/.test(value)) return false; // no spaces
+    if (value.length < 6 || value.length > 254) return false; // length
+  
+    const parts = value.split("@");
+    if (parts.length !== 2) return false; // only one @
+  
+    const [username, domain] = parts;
+  
+    if (!username || !domain) return false;
+    if (username.length > 64) return false;
+  
+    if (username.startsWith(".") || username.endsWith(".")) return false;
+    if (username.includes("..")) return false;
+  
+    if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/.test(username)) return false;
+  
+    if (!domain.includes(".")) return false;
+    if (domain.includes("..")) return false;
+    if (BLOCKED_EMAIL_DOMAINS.has(domain)) return false;
+  
+    const labels = domain.split(".");
+    const tld = labels[labels.length - 1];
+  
+    if (!tld || tld.length < 2) return false;
+    if (!/^[a-z]+$/.test(tld)) return false;
+  
+    const validLabels = labels.every((label) => {
+      if (!label) return false;
+      if (label.startsWith("-") || label.endsWith("-")) return false;
+      return /^[a-z0-9-]+$/.test(label);
+    });
+  
+    if (!validLabels) return false;
+  
+    const isDisposable = DISPOSABLE_EMAIL_KEYWORDS.some((keyword) =>
+      domain.includes(keyword)
+    );
+  
+    if (isDisposable) return false;
+  
+    return true;
+  }
+
 export default function OpenPdfViewer() {
     const searchParams = useSearchParams();
     const requestId = searchParams.get("requestId") || "";
@@ -74,6 +137,7 @@ export default function OpenPdfViewer() {
 const [emailSending, setEmailSending] = useState(false);
 const [emailSent, setEmailSent] = useState(false);
 const [latestBlogs, setLatestBlogs] = useState<BlogPost[]>([]);
+const emailValid = isValidEmail(emailValue);
 
     // Poll status
     useEffect(() => {
@@ -246,6 +310,11 @@ const [latestBlogs, setLatestBlogs] = useState<BlogPost[]>([]);
           return;
         }
       
+        if (!emailValid) {
+          setError("Please enter a valid email address.");
+          return;
+        }
+      
         try {
           setError(null);
           setEmailSending(true);
@@ -296,46 +365,78 @@ const [latestBlogs, setLatestBlogs] = useState<BlogPost[]>([]);
   </div>
 
   <div className="flex flex-col md:flex-row md:items-center gap-3 w-full lg:w-auto">
-    <div className="flex flex-col w-full md:w-[420px] gap-2">
-      <div className="flex w-full gap-2">
-        <input
-          type="email"
-          placeholder="you@example.com"
-          value={emailValue}
-          onChange={(e) => {
-            setEmailValue(e.target.value);
-            setEmailSent(false);
-          }}
-          className="h-11 flex-1 bg-background/60 border border-border rounded-xl px-4 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground text-sm"
-        />
+  <div className="flex flex-col w-full md:w-[420px] gap-2">
+  <div className="flex w-full gap-2">
+    <div className="relative flex-1">
+      <input
+        type="email"
+        placeholder="you@example.com"
+        value={emailValue}
+        onChange={(e) => {
+          setEmailValue(e.target.value);
+          setEmailSent(false);
+          if (error) setError(null);
+        }}
+        className="h-11 w-full bg-background/60 border border-border rounded-xl px-4 pr-12 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground text-sm"
+      />
 
-        <button
-          type="button"
-          onClick={handleSendEmail}
-          disabled={emailSending || !fileUrl}
-          title="Send PDF to email"
-          className="h-11 min-w-[86px] cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed text-sm"
+      <div
+        className={`absolute right-3 top-1/2 z-20 -translate-y-1/2 grid place-items-center rounded-full text-white transition-all duration-300 ${
+          emailValid ? "opacity-100 scale-100" : "opacity-0 scale-50"
+        }`}
+        style={{
+          height: "1.55rem",
+          width: "1.55rem",
+          background: "oklch(0.7 0.18 145)",
+          boxShadow: emailValid
+            ? "0 0 0 4px oklch(0.7 0.18 145 / 0.22)"
+            : "none",
+        }}
+      >
+        <Check
+          className="animate-[scale-in_0.35s_ease-out]"
           style={{
-            background: BRAND,
-            boxShadow: `0 10px 30px -10px ${BRAND}`,
+            height: "0.9rem",
+            width: "0.9rem",
+            strokeWidth: 3,
           }}
-        >
-          {emailSending ? (
-            <span className="animate-pulse">Sending...</span>
-          ) : emailSent ? (
-            <Check className="h-4 w-4" strokeWidth={3} />
-          ) : (
-            "Send"
-          )}
-        </button>
+        />
       </div>
-
-      {emailSent && (
-        <p className="text-xs text-green-500 pl-1">
-          PDF sent successfully
-        </p>
-      )}
     </div>
+
+    <button
+      type="button"
+      onClick={handleSendEmail}
+      disabled={emailSending || !fileUrl || !emailValid}
+      title="Send PDF to email"
+      className="h-11 min-w-[86px] cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed text-sm"
+      style={{
+        background: BRAND,
+        boxShadow: `0 10px 30px -10px ${BRAND}`,
+      }}
+    >
+      {emailSending ? (
+        <span className="animate-pulse">Sending...</span>
+      ) : emailSent ? (
+        <Check className="h-4 w-4" strokeWidth={3} />
+      ) : (
+        "Send"
+      )}
+    </button>
+  </div>
+
+  {emailValue && !emailValid && (
+    <p className="text-xs text-red-500 pl-1">
+      Please enter a valid email address.
+    </p>
+  )}
+
+  {emailSent && (
+    <p className="text-xs text-green-500 pl-1">
+      PDF sent successfully
+    </p>
+  )}
+</div>
 
     <Link
       href="/"

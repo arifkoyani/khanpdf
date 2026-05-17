@@ -21,6 +21,68 @@ const PAPER_SIZES = [
   "200mm 300mm", "20cm 30cm", "6in 8in", "200px 300px",
 ];
 
+
+const BLOCKED_EMAIL_DOMAINS = new Set([
+  "test.com",
+  "example.com",
+  "abc.com",
+  "localhost.com",
+]);
+
+const DISPOSABLE_EMAIL_KEYWORDS = [
+  "tempmail",
+  "10minutemail",
+  "mailinator",
+  "guerrillamail",
+  "yopmail",
+  "trashmail",
+];
+
+function isValidEmail(email: string) {
+  const value = email.trim().toLowerCase();
+
+  if (!value) return false;
+  if (/\s/.test(value)) return false;
+  if (value.length < 6 || value.length > 254) return false;
+
+  const parts = value.split("@");
+  if (parts.length !== 2) return false;
+
+  const [username, domain] = parts;
+
+  if (!username || !domain) return false;
+  if (username.length > 64) return false;
+  if (username.startsWith(".") || username.endsWith(".")) return false;
+  if (username.includes("..")) return false;
+
+  if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/.test(username)) return false;
+
+  if (!domain.includes(".")) return false;
+  if (domain.includes("..")) return false;
+  if (BLOCKED_EMAIL_DOMAINS.has(domain)) return false;
+
+  const labels = domain.split(".");
+  const tld = labels[labels.length - 1];
+
+  if (!tld || tld.length < 2) return false;
+  if (!/^[a-z]+$/.test(tld)) return false;
+
+  const validLabels = labels.every((label) => {
+    if (!label) return false;
+    if (label.startsWith("-") || label.endsWith("-")) return false;
+    return /^[a-z0-9-]+$/.test(label);
+  });
+
+  if (!validLabels) return false;
+
+  const isDisposable = DISPOSABLE_EMAIL_KEYWORDS.some((keyword) =>
+    domain.includes(keyword)
+  );
+
+  if (isDisposable) return false;
+
+  return true;
+}
 function isValidUrl(value: string) {
   const v = value.trim();
   if (!v) return false;
@@ -85,6 +147,7 @@ export default function UrlToPdf() {
   const [orientation, setOrientation] = useState<"Portrait" | "Landscape">("Portrait");
 
   const valid = useMemo(() => isValidUrl(url), [url]);
+  const emailValid = useMemo(() => isValidEmail(emailValue), [emailValue]);
 
   useEffect(() => {
     return () => {
@@ -239,6 +302,11 @@ export default function UrlToPdf() {
 
     if (!emailValue.trim()) {
       setError("Please enter your email.");
+      return;
+    }
+    
+    if (!emailValid) {
+      setError("Please enter a valid email address.");
       return;
     }
 
@@ -618,51 +686,88 @@ export default function UrlToPdf() {
                   </div>
 
                   {/* Email row */}
-                  <div className="w-full flex flex-col" style={{ gap: "0.5vh", marginTop: "0.4vh" }}>
-                    <div className="w-full flex" style={{ gap: "0.6rem" }}>
-                      <input
-                        type="email"
-                        placeholder="you@example.com"
-                        value={emailValue}
-                        onChange={(e) => { setEmailValue(e.target.value); setEmailSent(false); }}
-                        className="bg-background/60 border border-border rounded-xl outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
-                        style={{
-                          flex: "0 0 80%",
-                          height: "clamp(3rem, 6.5vh, 3.5rem)",
-                          paddingLeft: "1rem",
-                          paddingRight: "1rem",
-                          fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={handleSendEmail}
-                        disabled={emailSending}
-                        title="Send to email"
-                        className="cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
-                        style={{
-                          flex: "0 0 calc(20% - 0.6rem)",
-                          height: "clamp(3rem, 6.5vh, 3.5rem)",
-                          background: "#ff550d",
-                          boxShadow: "0 10px 30px -10px #ff550d",
-                          fontSize: "clamp(0.85rem, 1.3vw, 0.95rem)",
-                        }}
-                      >
-                        {emailSending ? (
-                          <span className="animate-pulse" >Sending...</span>
-                        ) : emailSent ? (
-                          <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3, }} />
-                        ) : (
-                          "Send"
-                        )}
-                      </button>
-                    </div>
-                    {emailSent && (
-                      <p style={{ fontSize: "clamp(0.75rem, 1.1vw, 0.82rem)", color: "#22c55e", paddingLeft: "0.25rem" }}>
-                        Message sent successfully
-                      </p>
-                    )}
-                  </div>
+                  {/* Email row */}
+<div className="w-full flex flex-col" style={{ gap: "0.5vh", marginTop: "0.4vh" }}>
+  <div className="w-full flex" style={{ gap: "0.6rem" }}>
+    <div className="relative" style={{ flex: "0 0 80%" }}>
+      <input
+        type="email"
+        placeholder="you@example.com"
+        value={emailValue}
+        onChange={(e) => {
+          setEmailValue(e.target.value);
+          setEmailSent(false);
+          if (error) setError(null);
+        }}
+        className="w-full bg-background/60 border border-border rounded-xl outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+        style={{
+          height: "clamp(3rem, 6.5vh, 3.5rem)",
+          paddingLeft: "1rem",
+          paddingRight: "3rem",
+          fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)",
+        }}
+      />
+
+      <div
+        className={`absolute right-3 top-1/2 z-20 -translate-y-1/2 grid place-items-center rounded-full text-white transition-all duration-300 ${
+          emailValid ? "opacity-100 scale-100" : "opacity-0 scale-50"
+        }`}
+        style={{
+          height: "1.55rem",
+          width: "1.55rem",
+          background: "oklch(0.7 0.18 145)",
+          boxShadow: emailValid
+            ? "0 0 0 4px oklch(0.7 0.18 145 / 0.22)"
+            : "none",
+        }}
+      >
+        <Check
+          className="animate-[scale-in_0.35s_ease-out]"
+          style={{
+            height: "0.9rem",
+            width: "0.9rem",
+            strokeWidth: 3,
+          }}
+        />
+      </div>
+    </div>
+
+    <button
+      type="button"
+      onClick={handleSendEmail}
+      disabled={emailSending || !emailValid}
+      title="Send to email"
+      className="cursor-pointer rounded-xl font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 inline-flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+      style={{
+        flex: "0 0 calc(20% - 0.6rem)",
+        height: "clamp(3rem, 6.5vh, 3.5rem)",
+        background: "#ff550d",
+        boxShadow: "0 10px 30px -10px #ff550d",
+        fontSize: "clamp(0.85rem, 1.3vw, 0.95rem)",
+      }}
+    >
+      {emailSending ? (
+        <span className="animate-pulse">Sending...</span>
+      ) : emailSent ? (
+        <Check style={{ height: "1.05rem", width: "1.05rem", strokeWidth: 3 }} />
+      ) : (
+        "Send"
+      )}
+    </button>
+  </div>
+
+  {emailValue && !emailValid && (
+    <p style={{ fontSize: "clamp(0.75rem, 1.1vw, 0.82rem)", color: "#ef4444", paddingLeft: "0.25rem" }}>
+      Please enter a valid email address.
+    </p>
+  )}
+
+  {emailSent && (
+    <p style={{ fontSize: "clamp(0.75rem, 1.1vw, 0.82rem)", color: "#22c55e", paddingLeft: "0.25rem" }}>
+      Message sent successfully
+    </p>
+  )}
+</div>
 
                   <button
                     type="button"
