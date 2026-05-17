@@ -23,6 +23,18 @@ import Spinner from "../ui/Spinner";
 
 
 type Status = "loading" | "processing" | "done" | "error";
+type BlogPost = {
+    id: string;
+    title: string;
+    slug: string;
+    category: string | null;
+    description: string | null;
+    read_time: string | null;
+    publish_date: string | null;
+    status: "draft" | "publish";
+    thumbnail_url: string | null;
+    created_at: string;
+  };
 
 const BRAND = "#ff550d";
 const STATUS_API = "/api/urltopdf/status";
@@ -61,6 +73,7 @@ export default function OpenPdfViewer() {
     const [emailValue, setEmailValue] = useState("");
 const [emailSending, setEmailSending] = useState(false);
 const [emailSent, setEmailSent] = useState(false);
+const [latestBlogs, setLatestBlogs] = useState<BlogPost[]>([]);
 
     // Poll status
     useEffect(() => {
@@ -148,6 +161,37 @@ const [emailSent, setEmailSent] = useState(false);
         if (!expiresAt) return ONE_HOUR_MS;
         return expiresAt.getTime() - now.getTime();
     }, [expiresAt, now]);
+
+
+    useEffect(() => {
+        const fetchLatestBlogs = async () => {
+          try {
+            const res = await fetch("/api/blogs/allblogs", {
+              cache: "no-store",
+            });
+      
+            const data = await res.json();
+      
+            if (!res.ok || !data.success) {
+              return;
+            }
+      
+            const publishedBlogs = (data.blogs || [])
+              .filter((blog: BlogPost) => blog.status === "publish")
+              .sort(
+                (a: BlogPost, b: BlogPost) =>
+                  new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              )
+              .slice(0, 3);
+      
+            setLatestBlogs(publishedBlogs);
+          } catch {
+            setLatestBlogs([]);
+          }
+        };
+      
+        fetchLatestBlogs();
+      }, []);
 
     const handleDownload = async () => {
         if (!fileUrl) return;
@@ -489,45 +533,61 @@ const [emailSent, setEmailSent] = useState(false);
                 </section>
 
                 {/* Latest blog */}
-                <section className="mt-10">
-                    <h2 className="font-display font-bold text-xl md:text-2xl mb-4">
-                        Latest from the blog
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {[
-                            {
-                                t: "How to Convert a Webpage to PDF Online",
-                                img: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=70&auto=format",
-                            },
-                            {
-                                t: "Best Way to Save Articles as PDF",
-                                img: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&q=70&auto=format",
-                            },
-                            {
-                                t: "How to Download a Website Page as PDF",
-                                img: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=70&auto=format",
-                            },
-                        ].map((b) => (
-                            <Link
-                                key={b.t}
-                                href="/blog"
-                                className="rounded-xl border border-border bg-card overflow-hidden hover:border-foreground/30 transition-colors"
-                            >
-                                <div className="aspect-[16/9] bg-muted overflow-hidden">
-                                    <img
-                                        src={b.img}
-                                        alt={b.t}
-                                        loading="lazy"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div className="p-4">
-                                    <p className="font-semibold leading-snug">{b.t}</p>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </section>
+                {/* Latest blog */}
+{latestBlogs.length > 0 && (
+  <section className="mt-10">
+    <h2 className="font-display font-bold text-xl md:text-2xl mb-4">
+      Latest from the blog
+    </h2>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {latestBlogs.map((blog) => (
+        <Link
+          key={blog.id}
+          href={`/blog/${blog.slug}`}
+          className="rounded-xl border border-border bg-card overflow-hidden hover:border-foreground/30 transition-colors"
+        >
+          <div className="aspect-[16/9] bg-muted overflow-hidden">
+            {blog.thumbnail_url ? (
+              <img
+                src={blog.thumbnail_url}
+                alt={blog.title}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <FileText className="h-8 w-8" />
+              </div>
+            )}
+          </div>
+
+          <div className="p-4">
+            {blog.category && (
+              <span className="inline-flex rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-semibold mb-2">
+                {blog.category}
+              </span>
+            )}
+
+            <p className="font-semibold leading-snug line-clamp-2">
+              {blog.title}
+            </p>
+
+            {blog.description && (
+              <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                {blog.description}
+              </p>
+            )}
+
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+              Read Article <ExternalLink className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        </Link>
+      ))}
+    </div>
+  </section>
+)}
 
                 {/* Trust */}
                 <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-10 mb-6">
