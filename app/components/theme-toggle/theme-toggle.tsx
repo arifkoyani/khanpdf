@@ -1,8 +1,8 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import { DarkModeSwitch } from 'react-toggle-dark-mode';
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -18,18 +18,19 @@ export function ThemeToggle() {
 
   const isDark = resolvedTheme === "dark";
 
+  const toggleDarkMode = (checked: boolean) => {
+    setTheme(checked ? "dark" : "light");
+  };
+
   return (
-    <button
-      type="button"
-      aria-label="Toggle theme"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="h-8 w-8 grid place-items-center rounded-lg border border-border bg-background/60 hover:border-primary/50 hover:text-primary transition-colors"
-    >
-      {isDark ? (
-        <Sun className="h-3.5 w-3.5" />
-      ) : (
-        <Moon className="h-3.5 w-3.5" />
-      )}
-    </button>
+    <DarkModeSwitch
+      checked={isDark}
+      onChange={toggleDarkMode}
+      size={20}
+      moonColor="white"
+      sunColor="black"
+      aria-label="Toggle dark mode"
+      className="rounded-lg border border-border bg-background/60 p-1 hover:border-primary/50 transition-colors"
+    />
   );
 }
