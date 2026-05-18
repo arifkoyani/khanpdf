@@ -29,20 +29,20 @@ import { Mail, MessageCircle, Globe, Calendar, AlertCircle, Clock} from "lucide-
 
           {/* Primary contact card */}
           <div className="mt-10 grid sm:grid-cols-2 gap-4">
-            <a
+            <Link
               href="mailto:support@khanpdf.com"
               className="group rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6 transition-all hover:border-primary/50 hover:-translate-y-0.5"
             >
-              <div className="h-10 w-10 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
-                <Mail className="h-5 w-5 text-background" />
+              <div className="h-10 w-10 rounded-xl bg-background grid place-items-center shadow-glow">
+                <Mail className="h-5 w-5 text-primary" />
               </div>
               <h3 className="mt-4 font-display text-base font-semibold">Email Support</h3>
-              <p className="mt-1 text-sm text-muted-foreground">support@khanpdf.com</p>
+              <p className="mt-1 text-sm text-muted-foreground">hello@khanpdf.com</p>
               <p className="mt-3 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                 Send a message →
               </p>
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://khanpdf.com"
               className="group rounded-2xl border border-border bg-card/60 p-6 transition-all hover:border-primary/50 hover:-translate-y-0.5"
             >
@@ -54,7 +54,7 @@ import { Mail, MessageCircle, Globe, Calendar, AlertCircle, Clock} from "lucide-
               <p className="mt-3 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                 Visit site →
               </p>
-            </a>
+            </Link>
           </div>
 
           {/* What to include */}
@@ -127,51 +127,51 @@ import { Mail, MessageCircle, Globe, Calendar, AlertCircle, Clock} from "lucide-
   </p>
 
   <div className="mt-5 flex flex-wrap gap-2.5">
-    <Link
-      href="https://github.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center rounded-xl border border-[#181717] bg-[#181717] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
-    >
-      GitHub
-    </Link>
+  <Link
+    href="https://github.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center rounded-xl border border-[#0d1117] bg-[#0d1117] px-4 py-2 text-sm font-semibold text-[#0d1117] transition-all hover:-translate-y-0.5 hover:opacity-90"
+  >
+    GitHub
+  </Link>
 
-    <Link
-      href="https://facebook.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center rounded-xl border border-[#1877F2] bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
-    >
-      Facebook
-    </Link>
+  <Link
+    href="https://facebook.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center rounded-xl border border-[#1877F2] bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
+  >
+    Facebook
+  </Link>
 
-    <Link
-      href="https://twitter.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center rounded-xl border border-[#1DA1F2] bg-[#1DA1F2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
-    >
-      Twitter
-    </Link>
+  <Link
+    href="https://twitter.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center rounded-xl border border-[#1DA1F2] bg-[#1DA1F2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
+  >
+    Twitter
+  </Link>
 
-    <Link
-      href="https://instagram.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center rounded-xl border border-[#E4405F] bg-[#E4405F] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
-    >
-      Instagram
-    </Link>
+  <Link
+    href="https://instagram.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center rounded-xl border border-[#E4405F] bg-[#E4405F] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
+  >
+    Instagram
+  </Link>
 
-    <Link
-      href="https://linkedin.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center rounded-xl border border-[#0A66C2] bg-[#0A66C2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
-    >
-      LinkedIn
-    </Link>
-  </div>
+  <Link
+    href="https://linkedin.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center rounded-xl border border-[#0A66C2] bg-[#0A66C2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
+  >
+    LinkedIn
+  </Link>
+</div>
 
   <div className="mt-6">
     <Link
