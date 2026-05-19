@@ -117,7 +117,7 @@ import { Mail, MessageCircle, Globe, Calendar, AlertCircle, Clock} from "lucide-
 
           {/* Socials */}
        {/* Socials */}
-       <section className="mt-5 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 md:p-7">
+       <section className="mt-5 mb-12  rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 md:p-7">
   <h2 className="font-display text-lg md:text-xl font-semibold">
     Follow KhanPDF
   </h2>
