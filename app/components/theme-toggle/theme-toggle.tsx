@@ -26,7 +26,7 @@ export function ThemeToggle() {
     <DarkModeSwitch
       checked={isDark}
       onChange={toggleDarkMode}
-      size={20}
+      size={18}
       moonColor="white"
       sunColor="black"
       aria-label="Toggle dark mode"
