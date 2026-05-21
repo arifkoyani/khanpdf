@@ -140,7 +140,7 @@ import { Mail, MessageCircle, Globe, Calendar, AlertCircle, Clock} from "lucide-
     href="https://facebook.com/"
     target="_blank"
     rel="noopener noreferrer"
-    className="inline-flex items-center rounded-xl border border-[#1877F2] bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
+    className="inline-flex items-center rounded-xl border border-[#1877F2] bg-[#1877F2] px-4 py-2 text-sm font-semibold text-[#1877F2] transition-all hover:-translate-y-0.5 hover:opacity-90"
   >
     Facebook
   </Link>
@@ -149,7 +149,7 @@ import { Mail, MessageCircle, Globe, Calendar, AlertCircle, Clock} from "lucide-
     href="https://twitter.com/"
     target="_blank"
     rel="noopener noreferrer"
-    className="inline-flex items-center rounded-xl border border-[#1DA1F2] bg-[#1DA1F2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
+    className="inline-flex items-center rounded-xl border border-[#1DA1F2] bg-[#1DA1F2] px-4 py-2 text-sm font-semibold text-[#1DA1F2] transition-all hover:-translate-y-0.5 hover:opacity-90"
   >
     Twitter
   </Link>
@@ -158,7 +158,7 @@ import { Mail, MessageCircle, Globe, Calendar, AlertCircle, Clock} from "lucide-
     href="https://instagram.com/"
     target="_blank"
     rel="noopener noreferrer"
-    className="inline-flex items-center rounded-xl border border-[#E4405F] bg-[#E4405F] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
+    className="inline-flex items-center rounded-xl border border-[#E4405F] bg-[#E4405F] px-4 py-2 text-sm font-semibold text-[#E4405F] transition-all hover:-translate-y-0.5 hover:opacity-90"
   >
     Instagram
   </Link>
@@ -167,7 +167,7 @@ import { Mail, MessageCircle, Globe, Calendar, AlertCircle, Clock} from "lucide-
     href="https://linkedin.com/"
     target="_blank"
     rel="noopener noreferrer"
-    className="inline-flex items-center rounded-xl border border-[#0A66C2] bg-[#0A66C2] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90"
+    className="inline-flex items-center rounded-xl border border-[#0A66C2] bg-[#0A66C2] px-4 py-2 text-sm font-semibold text-[#0A66C2] transition-all hover:-translate-y-0.5 hover:opacity-90"
   >
     LinkedIn
   </Link>
