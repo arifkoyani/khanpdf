@@ -40,7 +40,7 @@ type Props = { params: Promise<{ slug: string }> };
 export const dynamic = "force-dynamic";
 
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !supabaseServiceKey) return null;
 
