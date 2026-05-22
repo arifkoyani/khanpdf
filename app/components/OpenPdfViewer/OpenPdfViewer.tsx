@@ -426,13 +426,13 @@ const emailValid = isValidEmail(emailValue);
   </div>
 
   {emailValue && !emailValid && (
-    <p className="text-xs text-red-500 pl-1">
+    <p className="text-xs text-destructive pl-1">
       Please enter a valid email address.
     </p>
   )}
 
   {emailSent && (
-    <p className="text-xs text-green-500 pl-1">
+    <p className="text-xs text-success pl-1">
       PDF sent successfully
     </p>
   )}

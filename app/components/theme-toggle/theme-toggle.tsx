@@ -28,7 +28,7 @@ export function ThemeToggle() {
       onChange={toggleDarkMode}
       size={18}
       moonColor="white"
-      sunColor="black"
+      sunColor="#ff550d"
       aria-label="Toggle dark mode"
       className="rounded-lg border border-border bg-background/60 p-1 hover:border-primary/50 transition-colors"
     />

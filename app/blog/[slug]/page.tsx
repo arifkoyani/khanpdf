@@ -285,9 +285,8 @@ export default async function BlogDetailsPage({ params }: Props) {
 
   return (
     <article className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      {/* Ambient background - hidden in light mode */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[600px] bg-gradient-hero opacity-70 dark:block hidden" />
-      <div className="pointer-events-none absolute inset-0 grid-bg opacity-40 dark:block hidden" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[600px] bg-gradient-hero opacity-30 dark:opacity-70" />
+      <div className="pointer-events-none absolute inset-0 grid-bg opacity-25 dark:opacity-40" />
 
       <section className="relative mx-auto max-w-7xl px-8 py-14 md:py-20">
         {/* Thumbnail */}

@@ -228,7 +228,7 @@ export function SupportedFormats() {
                 Default paper size:
               </p>
 
-              <span className="mt-1 inline-block rounded-md border border-none bg-transparent px-2.5 py-1 text-xs font-semibold text-white">
+              <span className="mt-1 inline-block rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
                 A4
               </span>
 
