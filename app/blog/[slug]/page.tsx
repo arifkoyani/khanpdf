@@ -281,7 +281,6 @@ export default async function BlogDetailsPage({ params }: Props) {
           </div>
         )}
 
-        {/* Header */}
         <header className="mb-10 text-center">
           {blog.category && (
             <p className="mb-5 inline-flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-primary">
