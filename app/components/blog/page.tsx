@@ -2,13 +2,17 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import {
   ArrowUpRight,
-  Search,
   Rss,
   AtSign,
   ArrowRight,
 } from "lucide-react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import {
+  BlogArticleList,
+  BlogSearchInput,
+  BlogSearchProvider,
+} from "./BlogSearchSection";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +42,6 @@ type BlogPost = {
 
 type PageProps = {
   searchParams?: Promise<{
-    q?: string;
     category?: string;
   }>;
 };
@@ -115,7 +118,6 @@ function PostItem({
 
 export default async function BlogListingpage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {};
-  const searchQuery = params?.q?.trim() || "";
   const selectedCategory = params?.category?.trim() || "";
 
   let blogs: BlogPost[] = [];
@@ -128,21 +130,9 @@ export default async function BlogListingpage({ searchParams }: PageProps) {
 
   const publishedBlogs = blogs.filter((blog) => blog.status === "publish");
 
-  const filteredBlogs = publishedBlogs.filter((blog) => {
-    const searchText = `${blog.title} ${blog.description || ""} ${
-      blog.category || ""
-    }`.toLowerCase();
-
-    const matchesSearch = searchQuery
-      ? searchText.includes(searchQuery.toLowerCase())
-      : true;
-
-    const matchesCategory = selectedCategory
-      ? blog.category === selectedCategory
-      : true;
-
-    return matchesSearch && matchesCategory;
-  });
+  const categoryBlogs = publishedBlogs.filter((blog) =>
+    selectedCategory ? blog.category === selectedCategory : true
+  );
 
   const categories = Array.from(
     new Set(publishedBlogs.map((blog) => blog.category).filter(Boolean))
@@ -163,6 +153,7 @@ export default async function BlogListingpage({ searchParams }: PageProps) {
   const popularPosts = [...publishedBlogs].slice(0, 4);
 
   return (
+    <BlogSearchProvider blogs={categoryBlogs}>
     <div className="min-h-screen bg-background text-foreground">
       <main>
         <section className="px-5 pt-14 md:pt-20 pb-10">
@@ -191,19 +182,7 @@ export default async function BlogListingpage({ searchParams }: PageProps) {
 
         <section className="px-5 pb-8">
           <div className="mx-auto max-w-3xl">
-            <form
-              action="/blog"
-              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 focus-within:border-primary/60 transition"
-            >
-              <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <input
-                name="q"
-                type="search"
-                defaultValue={searchQuery}
-                placeholder="Search articles..."
-                className="bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none w-48 sm:w-64"
-              />
-            </form>
+            <BlogSearchInput />
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center">
               <Link
@@ -238,61 +217,7 @@ export default async function BlogListingpage({ searchParams }: PageProps) {
           <div className="mx-auto w-full px-4 sm:px-6 md:px-10">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight">
-                    Latest Articles
-                  </h2>
-                  <Link
-                    href="/blog"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                  >
-                    View all <ArrowUpRight className="h-3 w-3" />
-                  </Link>
-                </div>
-
-                {filteredBlogs.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-border p-10 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      No published blogs found.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-4">
-                    {filteredBlogs.map((blog) => (
-                      <article
-                        key={blog.id}
-                        className="rounded-2xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-card transition group"
-                      >
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          {blog.category && (
-                            <span className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 font-semibold">
-                              {blog.category}
-                            </span>
-                          )}
-                          <span>
-                            {blog.read_time || "5 min read"} •{" "}
-                            {formatDate(blog.publish_date)}
-                          </span>
-                        </div>
-
-                        <h3 className="mt-3 font-display text-lg md:text-xl font-bold tracking-tight">
-                          {blog.title}
-                        </h3>
-
-                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                          {blog.description}
-                        </p>
-
-                        <Link
-                          href={`/blog/${blog.slug}`}
-                          className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:gap-2 transition-all"
-                        >
-                          Read Article <ArrowUpRight className="h-4 w-4" />
-                        </Link>
-                      </article>
-                    ))}
-                  </div>
-                )}
+                <BlogArticleList />
               </div>
 
               <div className="space-y-5">
@@ -416,5 +341,6 @@ export default async function BlogListingpage({ searchParams }: PageProps) {
         </section>
       </main>
     </div>
+    </BlogSearchProvider>
   );
 }
