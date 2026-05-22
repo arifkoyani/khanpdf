@@ -14,7 +14,7 @@ const geistSans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "KhanPDF",
+  title:"KhanPDF",
   description: "Convert public URLs into PDF files online.",
   // verification: {
   //   google: "eK_YuDSi4L54xHu5OXX27M_wHP8J87FF2QuJUb5UjQ8",
