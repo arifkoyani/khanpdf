@@ -37,16 +37,26 @@ type BlogPost = {
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const dynamic = "force-dynamic";
+
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const appBaseUrl = process.env.APP_BASE_URL || "https://khanpdf.com";
-  const decodedSlug = encodeURIComponent(slug);
-  const res = await fetch(`${appBaseUrl}/api/blogs/${decodedSlug}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  if (!data.success || !data.blog) return null;
-  return data.blog as BlogPost;
+  const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseServiceKey) return null;
+
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const decodedSlug = decodeURIComponent(slug).trim();
+
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("slug", decodedSlug)
+    .eq("status", "publish")
+    .single();
+
+  if (error || !data) return null;
+  return data as BlogPost;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -228,12 +238,22 @@ function renderBodyContent(blog: BlogPost) {
     if (part === "[INFOGRAPHIC]") {
       if (!blog.infographic_url) return null;
       return (
-        <Image
+        <div
           key={`info-${index}`}
-          src={blog.infographic_url}
-          alt={blog.infographic_alt + blog.title+" khanpdf pdf || KhanPDF blog Infographic image"}
-          className="my-10 w-full rounded-2xl border border-border object-cover shadow-sm"
-        />
+          className="relative my-10 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border shadow-sm"
+        >
+          <Image
+            src={blog.infographic_url}
+            alt={
+              (blog.infographic_alt || "") +
+              blog.title +
+              " khanpdf pdf || KhanPDF blog Infographic image"
+            }
+            fill
+            sizes="(max-width: 768px) 100vw, 1280px"
+            className="object-cover"
+          />
+        </div>
       );
     }
     return <div key={`txt-${index}`}>{renderBlock(part, `b-${index}`)}</div>;
@@ -272,11 +292,19 @@ export default async function BlogDetailsPage({ params }: Props) {
       <section className="relative mx-auto max-w-7xl px-8 py-14 md:py-20">
         {/* Thumbnail */}
         {blog.thumbnail_url && (
-          <div className="mb-10 overflow-hidden rounded-3xl border border-border shadow-sm">
+          <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-3xl border border-border shadow-sm">
             <Image
-              src="https://cwrsszyjgkrcbcbqntem.supabase.co/storage/v1/object/public/khanpdf_bucket/blog/What%20Is%20URL%20to%20PDF%20and%20How%20Does%20It%20Work%20free.png"
-              alt={blog.thumbnail_alt +" and "+ blog.title+"khanpdf pdf ||  KhanPDF blog Thumbnail image"}
-              className="aspect-[16/9] w-full object-cover"
+              src={blog.thumbnail_url}
+              alt={
+                (blog.thumbnail_alt || "") +
+                " and " +
+                blog.title +
+                " khanpdf pdf || KhanPDF blog Thumbnail image"
+              }
+              fill
+              sizes="(max-width: 768px) 100vw, 1280px"
+              className="object-cover"
+              priority
             />
           </div>
         )}
