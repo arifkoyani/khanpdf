@@ -274,7 +274,7 @@ export default async function BlogDetailsPage({ params }: Props) {
         {blog.thumbnail_url && (
           <div className="mb-10 overflow-hidden rounded-3xl border border-border shadow-sm">
             <Image
-              src={blog.thumbnail_url}
+              src="https://cwrsszyjgkrcbcbqntem.supabase.co/storage/v1/object/public/khanpdf_bucket/blog/What%20Is%20URL%20to%20PDF%20and%20How%20Does%20It%20Work%20free.png"
               alt={blog.thumbnail_alt +" and "+ blog.title+"khanpdf pdf ||  KhanPDF blog Thumbnail image"}
               className="aspect-[16/9] w-full object-cover"
             />
