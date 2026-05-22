@@ -357,22 +357,7 @@ export default async function BlogListingpage({ searchParams }: PageProps) {
                   </div>
                 </SidebarCard>
 
-                <SidebarCard title="Stay Updated">
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Subscribe to our newsletter for the latest PDF tips and
-                    guides.
-                  </p>
-                  <div className="space-y-3">
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition"
-                    />
-                    <button className="w-full rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition">
-                      Subscribe
-                    </button>
-                  </div>
-                </SidebarCard>
+            
 
                 <SidebarCard title="Explore PDF Tools">
                   <p className="text-xs text-muted-foreground mb-4">
