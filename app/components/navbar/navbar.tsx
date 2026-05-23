@@ -19,7 +19,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/60 py-2">
       <div className="mx-auto max-w-5xl px-5 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <span className="font-display flex justify-start items-end font-bold text-sm tracking-tight">
+          <span className="font-display flex justify-end items-end font-bold text-sm tracking-tight gap-1">
             <Image
               src="/logo.png"
               alt="KhanPDF Logo"
