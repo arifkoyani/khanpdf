@@ -41,10 +41,10 @@ export default function Footer() {
             <Link href="/" className="flex items-center gap-2 group">
               <span className="font-display flex justify-center items-end font-bold text-sm tracking-tight">
                 <Image
-                  src="/logoo.PNG"
+                  src="/logo.PNG"
                   alt="KhanPDF Logo"
-                  width={60}
-                  height={60}
+                  width={50}
+                  height={50}
                 />
                 <span className="text-foreground">KhanPDF</span>
               </span>
