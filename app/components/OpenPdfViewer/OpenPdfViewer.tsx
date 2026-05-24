@@ -506,7 +506,7 @@ const emailValid = isValidEmail(emailValue);
                             type="button"
                             onClick={handleDownload}
                             disabled={!fileUrl}
-                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 transition-all hover:-translate-y-0.5"
+                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 transition-all hover:-translate-y-0.5 cursor-pointer"
                             style={{
                                 background: BRAND,
                                 border: "1px solid rgba(255,255,255,0.85)",
@@ -522,14 +522,14 @@ const emailValid = isValidEmail(emailValue);
                                 window.open(fileUrl, "_blank", "noopener,noreferrer")
                             }
                             disabled={!fileUrl}
-                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-foreground border border-border bg-background/60 disabled:opacity-50 transition-all hover:-translate-y-0.5"
+                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-foreground border border-border bg-background/60 disabled:opacity-50 transition-all hover:-translate-y-0.5 cursor-pointer"
                         >
                             <ExternalLink className="h-4 w-4" /> Open Direct
                         </button>
                         <button
                             type="button"
                             onClick={handleShare}
-                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-foreground border border-border bg-background/60 transition-all hover:-translate-y-0.5"
+                            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-foreground border border-border bg-background/60 transition-all hover:-translate-y-0.5 cursor-pointer"
                         >
                             {copied ? (
                                 <>
