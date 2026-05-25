@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import type { Metadata } from "next";
 import Homepage from "./components/homepage/homepage";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "../lib/seo";
@@ -67,3 +68,16 @@ export default function Home() {
     </>
   );
 }
+=======
+import Image from "next/image";
+import Main from "@/components/main/main";
+
+export default function Home() {
+  return (
+    <div>
+      
+      <Main/>
+    </div>
+  );
+}
+>>>>>>> aee5cace0a3729fe7528f70e855b8a40f488de50
