@@ -1,20 +1,28 @@
 import type { Metadata } from "next";
 import UrlToPdf from "../components/urltopdf/urltopdf";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "../../lib/seo";
 
 export const metadata: Metadata = {
   title: "Convert URL to PDF Online Free | Webpage to PDF Converter | KhanPDF",
   description:
     "Convert any public URL into a clean PDF online for free. KhanPDF lets you save webpages, articles, images, HTML files, text files, and public links as downloadable PDFs.",
   alternates: {
-    canonical: "https://khanpdf.com/url-to-pdf",
+    canonical: `${SITE_URL}/url-to-pdf`,
   },
   openGraph: {
     title: "Convert URL to PDF Online Free | Webpage to PDF Converter | KhanPDF",
     description:
       "Convert any public URL into a clean PDF online for free. KhanPDF lets you save webpages, articles, images, HTML files, text files, and public links as downloadable PDFs.",
-    url: "https://khanpdf.com/url-to-pdf",
-    siteName: "KhanPDF",
+    url: `${SITE_URL}/url-to-pdf`,
     type: "website",
+    images: [{ url: DEFAULT_OG_IMAGE, alt: "KhanPDF URL to PDF Converter" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Convert URL to PDF Online Free | KhanPDF",
+    description:
+      "Convert any public URL into a clean, downloadable PDF online for free with KhanPDF.",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 
@@ -23,7 +31,7 @@ const webApplicationSchema = {
   "@type": "WebApplication",
   name: "KhanPDF URL to PDF Converter",
   alternateName: "KhanPDF Convert Any URL to PDF",
-  url: "https://khanpdf.com/url-to-pdf",
+  url: `${SITE_URL}/url-to-pdf`,
   applicationCategory: "UtilitiesApplication",
   operatingSystem: "All",
   browserRequirements: "Requires JavaScript",

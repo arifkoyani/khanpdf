@@ -1,15 +1,5 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQ } from "../homepage/FAQ/FAQ";
-
-export const metadata: Metadata = {
-  title: "FAQs — URL to PDF",
-  description: "Frequently asked questions about converting webpages to PDF with URL2PDF.",
-  openGraph: {
-    title: "FAQs — URL to PDF",
-    description: "Frequently asked questions about converting webpages to PDF with URL2PDF.",
-  },
-};
 
 export default function FAQS() {
   return (

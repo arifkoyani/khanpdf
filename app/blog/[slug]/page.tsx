@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Calendar, Clock, ArrowUpRight, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { DEFAULT_OG_IMAGE, SITE_URL, toAbsoluteUrl } from "../../../lib/seo";
 import {
   Accordion,
   AccordionContent,
@@ -66,14 +68,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: "Blog Not Found | KhanPDF",
       description: "The blog post you are looking for could not be found.",
+      robots: { index: false, follow: false },
     };
   }
   const title = blog.meta_title || blog.title;
   const description =
     blog.meta_description || blog.description || "Read this KhanPDF blog post.";
-  const image = blog.thumbnail_url || "/logo.png";
+  const image = toAbsoluteUrl(blog.thumbnail_url || DEFAULT_OG_IMAGE);
   const canonical =
-    blog.canonical_url || `https://khanpdf.com/blog/${blog.slug}`;
+    blog.canonical_url || `${SITE_URL}/blog/${blog.slug}`;
   return {
     title,
     description,
@@ -83,7 +86,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: canonical,
       type: "article",
-      images: [{ url: image, width: 1200, height: 630, alt: blog.thumbnail_alt || blog.title }],
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: blog.thumbnail_alt || blog.title,
+        },
+      ],
       publishedTime: blog.publish_date || blog.created_at,
       modifiedTime: blog.updated_at,
     },
@@ -93,6 +103,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       images: [image],
     },
+    robots: { index: true, follow: true },
   };
 }
 
@@ -193,9 +204,9 @@ function renderBlock(text: string, keyPrefix: string) {
           key={key}
           className="mt-14 mb-6 rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-background to-background px-7 py-6 shadow-sm"
         >
-          <h1 className="font-display text-3xl md:text-4xl font-bold tracking-[-0.03em] leading-[1.1] text-foreground">
+          <h2 className="font-display text-3xl md:text-4xl font-bold tracking-[-0.03em] leading-[1.1] text-foreground">
             {line.replace(/^#\s+/, "")}
-          </h1>
+          </h2>
         </div>,
       );
       return;
@@ -244,11 +255,7 @@ function renderBodyContent(blog: BlogPost) {
         >
           <Image
             src={blog.infographic_url}
-            alt={
-              (blog.infographic_alt || "") +
-              blog.title +
-              " khanpdf pdf || KhanPDF blog Infographic image"
-            }
+            alt={blog.infographic_alt || `${blog.title} infographic`}
             fill
             sizes="(max-width: 768px) 100vw, 1280px"
             className="object-cover"
@@ -282,9 +289,45 @@ export default async function BlogDetailsPage({ params }: Props) {
 
   const publishedDate = formatDate(blog.publish_date || blog.created_at);
   const faqs = normalizeFaqs(blog.faqs);
+  const canonical =
+    blog.canonical_url || `${SITE_URL}/blog/${blog.slug}`;
+  const ogImage = toAbsoluteUrl(blog.thumbnail_url || DEFAULT_OG_IMAGE);
+
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: blog.title,
+    description: blog.meta_description || blog.description,
+    image: [ogImage],
+    datePublished: blog.publish_date || blog.created_at,
+    dateModified: blog.updated_at,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": canonical,
+    },
+    author: {
+      "@type": "Organization",
+      name: "KhanPDF",
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "KhanPDF",
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/logo.png`,
+      },
+    },
+  };
 
   return (
     <article className="relative min-h-screen overflow-hidden bg-background text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleSchema).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[600px] bg-gradient-hero opacity-30 dark:opacity-70" />
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-25 dark:opacity-40" />
 
@@ -294,12 +337,7 @@ export default async function BlogDetailsPage({ params }: Props) {
           <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-3xl border border-border shadow-sm">
             <Image
               src={blog.thumbnail_url}
-              alt={
-                (blog.thumbnail_alt || "") +
-                " and " +
-                blog.title +
-                " khanpdf pdf || KhanPDF blog Thumbnail image"
-              }
+              alt={blog.thumbnail_alt || blog.title}
               fill
               sizes="(max-width: 768px) 100vw, 1280px"
               className="object-cover"
@@ -404,13 +442,13 @@ export default async function BlogDetailsPage({ params }: Props) {
             Convert, compress, and craft PDFs with KhanPDF — fast, free,
             fidelity-first.
           </p>
-          <a
-            href="/"
+          <Link
+            href="/url-to-pdf"
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
           >
-            Explore KhanPDF Tools
+            Convert URL to PDF
             <ArrowUpRight className="h-4 w-4" />
-          </a>
+          </Link>
         </section>
       </section>
     </article>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import BlogListingpage from "../components/blog/page";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "../../lib/seo";
 
 export const metadata: Metadata = {
   title: "KhanPDF Blog | PDF Tools, Guides & Tutorials",
@@ -14,21 +15,22 @@ export const metadata: Metadata = {
     "online PDF tools",
   ],
   alternates: {
-    canonical: "https://khanpdf.com/blog",
+    canonical: `${SITE_URL}/blog`,
   },
   openGraph: {
     title: "KhanPDF Blog | PDF Tools, Guides & Tutorials",
     description:
       "Explore KhanPDF guides, tutorials, and tips about PDF tools, URL to PDF conversion, and document productivity.",
-    url: "https://khanpdf.com/blog",
-    siteName: "KhanPDF",
+    url: `${SITE_URL}/blog`,
     type: "website",
+    images: [{ url: DEFAULT_OG_IMAGE, alt: "KhanPDF Blog" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "KhanPDF Blog | PDF Tools, Guides & Tutorials",
     description:
       "Read KhanPDF tutorials and guides about PDF tools, URL to PDF conversion, and document productivity.",
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,

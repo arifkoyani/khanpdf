@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { SITE_URL } from "../lib/seo";
 
-const BASE_URL = "https://khanpdf.com";
+const BASE_URL = SITE_URL;
 
 const staticPages: MetadataRoute.Sitemap = [
   {

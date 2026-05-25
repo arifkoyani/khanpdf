@@ -1,20 +1,28 @@
 import type { Metadata } from "next";
 import FAQS from "../components/faqs/faqs";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "../../lib/seo";
 
 export const metadata: Metadata = {
   title: "FAQs | URL to PDF Converter | KhanPDF",
   description:
     "Find answers to common questions about KhanPDF URL to PDF Converter, supported URLs, PDF settings, downloads, email sharing, and public webpage conversion.",
   alternates: {
-    canonical: "https://khanpdf.com/faqs",
+    canonical: `${SITE_URL}/faqs`,
   },
   openGraph: {
     title: "FAQs | URL to PDF Converter | KhanPDF",
     description:
       "Frequently asked questions about converting public URLs, webpages, images, HTML, text files, and online content into PDF with KhanPDF.",
-    url: "https://khanpdf.com/faqs",
-    siteName: "KhanPDF",
+    url: `${SITE_URL}/faqs`,
     type: "website",
+    images: [{ url: DEFAULT_OG_IMAGE, alt: "KhanPDF FAQs" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FAQs | URL to PDF Converter | KhanPDF",
+    description:
+      "Answers about KhanPDF URL to PDF conversion, supported URLs, downloads, and settings.",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import TermsOfPolicy from "../components/termsofservice/termsofservice";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "../../lib/seo";
 
 export const metadata: Metadata = {
   title: "Terms of Service | KhanPDF",
@@ -13,21 +14,22 @@ export const metadata: Metadata = {
     "KhanPDF legal",
   ],
   alternates: {
-    canonical: "https://khanpdf.com/terms-of-service",
+    canonical: `${SITE_URL}/terms-of-service`,
   },
   openGraph: {
     title: "Terms of Service | KhanPDF",
     description:
       "Review KhanPDF Terms of Service for using our online URL to PDF tools safely and responsibly.",
-    url: "https://khanpdf.com/terms-of-service",
-    siteName: "KhanPDF",
+    url: `${SITE_URL}/terms-of-service`,
     type: "website",
+    images: [{ url: DEFAULT_OG_IMAGE, alt: "KhanPDF Terms of Service" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Terms of Service | KhanPDF",
     description:
       "Read KhanPDF Terms of Service for using our URL to PDF conversion tools.",
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,

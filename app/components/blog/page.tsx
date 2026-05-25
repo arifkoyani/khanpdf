@@ -6,7 +6,6 @@ import {
   AtSign,
   ArrowRight,
 } from "lucide-react";
-import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import {
   BlogArticleList,
@@ -15,17 +14,6 @@ import {
 } from "./BlogSearchSection";
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  title: "Blog — Simple PDF Guides for Modern Work",
-  description:
-    "Clean, practical guides on converting, managing, and working with PDFs.",
-  openGraph: {
-    title: "Blog — Simple PDF Guides for Modern Work",
-    description:
-      "Clean, practical guides on converting, managing, and working with PDFs.",
-  },
-};
 
 type BlogPost = {
   id: string;
