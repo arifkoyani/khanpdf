@@ -10,6 +10,8 @@ const navItems = [
   { to: "/url-to-pdf", label: "URL to PDF" },
   { to: "/faqs", label: "FAQs" },
   { to: "/blog", label: "Blog" },
+  { to: "/privacy-policy", label: "Privacy policy" },
+  { to: "/contact-us", label: "Contact-us" }
 ] as const;
 
 export default function Navbar() {
